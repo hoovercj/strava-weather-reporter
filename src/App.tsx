@@ -32,18 +32,9 @@ class App extends React.Component<IAppProps, IAppState> {
     constructor(props: IAppProps) {
         super(props);
 
-        const initialState: IAppState = {};
-
-        const storedUserInfoString = this.props.storage.getItem(this.USER_INFORMATION_STORAGE_KEY);
-        if (storedUserInfoString) {
-            try {
-                initialState.userInfo = JSON.parse(storedUserInfoString);
-            } catch (e) {
-                this.props.storage.removeItem(this.USER_INFORMATION_STORAGE_KEY);
-            }
-        }
-
-        this.state = initialState;
+        this.state = {
+            userInfo: this.getUserInfoFromStorage(),
+        };
     }
 
     public componentDidMount(): void {
@@ -87,13 +78,7 @@ class App extends React.Component<IAppProps, IAppState> {
             return [
                 {
                     key: 'page-sign-out',
-                    onClick: () => {
-                        this.props.storage.clear();
-                        this.setState({
-                            ...this.state,
-                            userInfo: undefined,
-                        });
-                    },
+                    onClick: this.signOut,
                     text: `Sign Out, ${this.state.userInfo.athlete.firstname}`,
                 }
             ]
@@ -101,11 +86,31 @@ class App extends React.Component<IAppProps, IAppState> {
             return [
                 {
                     key: 'page-sign-in',
-                    onClick: () => this.props.strava.redirectToStravaAuthorizationPage(),
+                    onClick: this.props.strava.redirectToStravaAuthorizationPage,
                     text: 'Sign In',
                 }
             ]
         }
+    }
+
+    private signOut = () => {
+        this.props.storage.clear();
+        this.setState({
+            ...this.state,
+            userInfo: undefined,
+        });
+    }
+
+    private getUserInfoFromStorage = (): IUserInfo | undefined => {
+        const storedUserInfoString = this.props.storage.getItem(this.USER_INFORMATION_STORAGE_KEY);
+        if (storedUserInfoString) {
+            try {
+                return JSON.parse(storedUserInfoString);
+            } catch (e) {
+                this.props.storage.removeItem(this.USER_INFORMATION_STORAGE_KEY);
+            }
+        }
+        return;
     }
 
     private handleError = (error: any) => {

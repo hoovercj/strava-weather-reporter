@@ -3,7 +3,5 @@ export const getQueryStringValue = (key: string): string => {
 }
 
 export const clearQueryString = (): void => {
-    if (window.location.search) {
-        window.location.search = '';
-    }
+    window.history.replaceState({}, document.title, '/');
 }
