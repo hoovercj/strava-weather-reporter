@@ -8,15 +8,18 @@ import registerServiceWorker from './registerServiceWorker';
 import { Storage } from './services/storage';
 import { Strava } from './services/strava/strava';
 
+const storage = new Storage();
+const stravaConfig = {
+    backendUri: 'http://localhost:7071/api',
+    clientId: 25119,
+    stravaCodeRedirectUri: 'http://localhost:3000/',
+}
+const strava = new Strava(stravaConfig, storage);
+
 ReactDOM.render(
-  <App
-    storage={new Storage()}
-    strava={new Strava({
-      backendUri: 'http://localhost:7071/api',
-      clientId: 25119,
-      stravaCodeRedirectUri: 'http://localhost:3000/',
-    })}
-  />,
-  document.getElementById('root') as HTMLElement
+    <App
+        strava={strava}
+    />,
+    document.getElementById('root') as HTMLElement
 );
 registerServiceWorker();

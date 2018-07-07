@@ -6,8 +6,6 @@ import {
     IHeaderProps
 } from './components/header/header';
 
-import { IStorage } from './services/storage';
-
 import { IStrava, IUserInfo } from './services/strava/strava';
 
 import {
@@ -16,7 +14,6 @@ import {
 } from './utils/query-string';
 
 interface IAppProps {
-    storage: IStorage,
     strava: IStrava,
 }
 
@@ -27,13 +24,11 @@ interface IAppState {
 
 class App extends React.Component<IAppProps, IAppState> {
 
-    private readonly USER_INFORMATION_STORAGE_KEY = 'USER_INFORMATION';
-
     constructor(props: IAppProps) {
         super(props);
 
         this.state = {
-            userInfo: this.getUserInfoFromStorage(),
+            userInfo: this.props.strava.cachedUserInformation(),
         };
     }
 
@@ -79,7 +74,7 @@ class App extends React.Component<IAppProps, IAppState> {
                 {
                     key: 'page-sign-out',
                     onClick: this.signOut,
-                    text: `Sign Out, ${this.state.userInfo.athlete.firstname}`,
+                    text: `Sign Out, ${this.state.userInfo.firstname}`,
                 }
             ]
         } else {
@@ -94,23 +89,11 @@ class App extends React.Component<IAppProps, IAppState> {
     }
 
     private signOut = () => {
-        this.props.storage.clear();
+        this.props.strava.clearCachedUserInformation();
         this.setState({
             ...this.state,
             userInfo: undefined,
         });
-    }
-
-    private getUserInfoFromStorage = (): IUserInfo | undefined => {
-        const storedUserInfoString = this.props.storage.getItem(this.USER_INFORMATION_STORAGE_KEY);
-        if (storedUserInfoString) {
-            try {
-                return JSON.parse(storedUserInfoString);
-            } catch (e) {
-                this.props.storage.removeItem(this.USER_INFORMATION_STORAGE_KEY);
-            }
-        }
-        return;
     }
 
     private handleError = (error: any) => {
@@ -125,7 +108,6 @@ class App extends React.Component<IAppProps, IAppState> {
             ...this.state,
             userInfo: info
         });
-        this.props.storage.setItem(this.USER_INFORMATION_STORAGE_KEY, JSON.stringify(info));
         clearQueryString();
     }
 }

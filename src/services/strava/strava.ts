@@ -1,3 +1,5 @@
+import { IStorage } from 'src/services/storage';
+
 type primitive = string | number | boolean;
 
 export interface IStravaConfiguration {
@@ -9,23 +11,53 @@ export interface IStravaConfiguration {
 export interface IStrava {
     exchangeCodeForUserInformation(code: string): Promise<IUserInfo>;
     redirectToStravaAuthorizationPage(): void;
+    cachedUserInformation(): IUserInfo | undefined;
+    clearCachedUserInformation(): void;
+}
+
+export interface IStravaAuthenticationResponse {
+    access_token: string;
+    athlete: IUserInfo;
 }
 
 export interface IUserInfo {
-    access_token: string;
-    athlete: {
-        id: number;
-        username: string;
-        firstname: string;
-        lastname: string;
-        profile_medium: string;
-        profile: string;
-        email: string;
-    }
+    id: number;
+    username: string;
+    firstname: string;
+    lastname: string;
+    profile_medium: string;
+    profile: string;
+    email: string;
 }
 
 export class Strava implements IStrava {
-    constructor(private config: IStravaConfiguration) {
+
+    private readonly STRAVA_AUTH_INFO_STORAGE_KEY = 'STRAVA_AUTH_INFO';
+
+    private stravaResponse: IStravaAuthenticationResponse | undefined;
+
+    constructor(private config: IStravaConfiguration, private storage: IStorage) {
+    }
+
+    public cachedUserInformation = (): IUserInfo | undefined => {
+        if (!this.stravaResponse) {
+            const storedStravaAuthInfoString = this.storage.getItem(this.STRAVA_AUTH_INFO_STORAGE_KEY);
+            if (storedStravaAuthInfoString) {
+                try {
+                    this.stravaResponse = JSON.parse(storedStravaAuthInfoString);
+                } catch (e) {
+                    this.storage.removeItem(this.STRAVA_AUTH_INFO_STORAGE_KEY);
+                }
+            }
+        }
+
+        return this.stravaResponse
+            && this.stravaResponse.athlete;
+    }
+
+    public clearCachedUserInformation = (): void => {
+        this.stravaResponse = undefined;
+        this.storage.clear();
     }
 
     public exchangeCodeForUserInformation = (code: string): Promise<IUserInfo> => {
@@ -35,7 +67,13 @@ export class Strava implements IStrava {
         };
         const url = this.getUrlWithParams(authUrl, params);
         // TODO: Do I need a fetch polyfill?
-        return fetch(url).then(response => response.json());
+        return fetch(url)
+            .then(response => response.json())
+            .then((stravaResponse: IStravaAuthenticationResponse) => {
+                this.stravaResponse = stravaResponse;
+                this.storage.setItem(this.STRAVA_AUTH_INFO_STORAGE_KEY, JSON.stringify(stravaResponse));
+                return stravaResponse.athlete;
+            });
     }
 
     public redirectToStravaAuthorizationPage = () => {
