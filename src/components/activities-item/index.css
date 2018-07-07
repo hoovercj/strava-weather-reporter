@@ -1,0 +1,12 @@
+.activity-item_time {
+    color: #99999e;
+}
+
+.activity-item_name {
+    font-weight: bold;
+}
+
+.activity-item_stat {
+    color: #606065;
+    padding-right: 10px;
+}
