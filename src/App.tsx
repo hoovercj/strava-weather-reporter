@@ -1,4 +1,6 @@
 import * as React from 'react';
+import { ActivitiesList } from 'src/components/activities-list';
+import { IStrava, IUserInfo } from 'src/services/strava/strava';
 import './App.css';
 import {
     Header,
@@ -6,7 +8,6 @@ import {
     IHeaderProps
 } from './components/header/header';
 
-import { IStrava, IUserInfo } from './services/strava/strava';
 
 import {
     clearQueryString,
@@ -54,9 +55,9 @@ class App extends React.Component<IAppProps, IAppState> {
         return (
             <div className="App">
                 <Header {...this.getHeaderProps()} />
-                <p className="App-intro">
-                    To get started, edit <code>src/App.tsx</code> and save to reload.
-                </p>
+                { this.state.userInfo &&
+                    <ActivitiesList strava={this.props.strava} />
+                }
             </div>
         );
     }
@@ -89,7 +90,7 @@ class App extends React.Component<IAppProps, IAppState> {
     }
 
     private signOut = () => {
-        this.props.strava.clearCachedUserInformation();
+        this.props.strava.clearCachedInformation();
         this.setState({
             ...this.state,
             userInfo: undefined,
