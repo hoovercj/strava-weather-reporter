@@ -67,7 +67,7 @@ export class Strava implements IStrava {
         };
         const url = this.getUrlWithParams(authUrl, params);
         // TODO: Do I need a fetch polyfill?
-        return fetch(url)
+        return fetch(url, { method: 'POST' })
             .then(response => response.json())
             .then((stravaResponse: IStravaAuthenticationResponse) => {
                 this.stravaResponse = stravaResponse;
@@ -96,4 +96,5 @@ export class Strava implements IStrava {
         }).join('&');
 
         return `${url}?${paramsString}`;
-    }}
+    }
+}
