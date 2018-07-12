@@ -1,4 +1,12 @@
+import {
+    ActivitiesApi,
+    Configuration,
+    SummaryActivity,
+} from 'src/lib/strava';
 import { IStorage } from 'src/services/storage';
+
+export type IActivitiesApi = ActivitiesApi;
+export type ISummaryActivity = SummaryActivity;
 
 type primitive = string | number | boolean;
 
@@ -9,12 +17,13 @@ export interface IStravaConfiguration {
 }
 
 export interface IStrava {
+    activitiesApi: ActivitiesApi;
     exchangeCodeForUserInformation(code: string): Promise<IUserInfo>;
     redirectToStravaAuthorizationPage(): void;
     cachedUserInformation(): IUserInfo | undefined;
     clearCachedInformation(): void;
-    cachedUserActivities(): ISummaryActivity[];
-    fetchUserActivities(): Promise<ISummaryActivity[]>
+    // cachedUserActivities(): ISummaryActivity[];
+    // fetchUserActivities(): Promise<ISummaryActivity[]>
 }
 
 export interface IStravaAuthenticationResponse {
@@ -34,40 +43,51 @@ export interface IUserInfo {
 
 export class Strava implements IStrava {
 
+    public get activitiesApi(): ActivitiesApi {
+        return this._activitiesApi;
+    }
+    private _activitiesApi: ActivitiesApi;
+
     private cache: { [key: string]: any } = {};
 
+
     private readonly STRAVA_AUTH_INFO_STORAGE_KEY = 'STRAVA_AUTH_INFO';
-    private readonly STRAVA_USER_ACTIVITIES_STORAGE_KEY = 'STRAVA_USER_ACTIVITIES';
+    // private readonly STRAVA_USER_ACTIVITIES_STORAGE_KEY = 'STRAVA_USER_ACTIVITIES';
 
     constructor(private config: IStravaConfiguration, private storage: IStorage) {
+        const apiConfig: Configuration = { accessToken: this.getAuthToken };
+        this._activitiesApi = new ActivitiesApi(apiConfig);
     }
 
-    public fetchUserActivities = (): Promise<ISummaryActivity[]> => {
-        const authInfo = this.cachedStravaAuthInfo();
-        const token = authInfo && authInfo.access_token;
+    public getActivitiesApi = (): ActivitiesApi => this.activitiesApi;
 
-        if (!token) {
-            return Promise.resolve([]);
-        }
 
-        const authUrl = `${this.config.backendUri}/activities`;
-        const params = {
-            token,
-        };
-        const url = this.getUrlWithParams(authUrl, params);
-        // TODO: Do I need a fetch polyfill?
-        return fetch(url)
-            .then(response => response.json())
-            .then(JSON.parse)
-            .then((stravaResponse: ISummaryActivity[]) => {
-                this.setCachedValue(this.STRAVA_USER_ACTIVITIES_STORAGE_KEY, stravaResponse);
-                return stravaResponse;
-            });
-    }
+    // public fetchUserActivities = (): Promise<ISummaryActivity[]> => {
+    //     const authInfo = this.cachedStravaAuthInfo();
+    //     const token = authInfo && authInfo.access_token;
 
-    public cachedUserActivities = (): ISummaryActivity[] => {
-        return this.getCachedValue<ISummaryActivity[]>(this.STRAVA_USER_ACTIVITIES_STORAGE_KEY);
-    }
+    //     if (!token) {
+    //         return Promise.resolve([]);
+    //     }
+
+    //     const authUrl = `${this.config.backendUri}/activities`;
+    //     const params = {
+    //         token,
+    //     };
+    //     const url = this.getUrlWithParams(authUrl, params);
+    //     // TODO: Do I need a fetch polyfill?
+    //     return fetch(url)
+    //         .then(response => response.json())
+    //         .then(JSON.parse)
+    //         .then((stravaResponse: ISummaryActivity[]) => {
+    //             this.setCachedValue(this.STRAVA_USER_ACTIVITIES_STORAGE_KEY, stravaResponse);
+    //             return stravaResponse;
+    //         });
+    // }
+
+    // public cachedUserActivities = (): ISummaryActivity[] => {
+    //     return this.getCachedValue<ISummaryActivity[]>(this.STRAVA_USER_ACTIVITIES_STORAGE_KEY);
+    // }
 
     public cachedUserInformation = (): IUserInfo => {
         const stravaResponse = this.cachedStravaAuthInfo();
@@ -110,6 +130,11 @@ export class Strava implements IStrava {
         (window.location as any) = url;
     }
 
+    private getAuthToken = (): string => {
+        const authInfo = this.cachedStravaAuthInfo();
+        return authInfo && authInfo.access_token;
+    }
+
     private cachedStravaAuthInfo = (): IStravaAuthenticationResponse => {
         return this.getCachedValue<IStravaAuthenticationResponse>(this.STRAVA_AUTH_INFO_STORAGE_KEY);
     }
@@ -142,46 +167,46 @@ export class Strava implements IStrava {
     }
 }
 
-export type LatLng = [number, number];
+// export type LatLng = [number, number];
 
-export interface IPolylineMap {
-    'id'?: string;
-    'polyline'?: string;
-    'summary_polyline'?: string;
-}
+// export interface IPolylineMap {
+//     'id'?: string;
+//     'polyline'?: string;
+//     'summary_polyline'?: string;
+// }
 
-export interface ISummaryActivity {
-    'id'?: number;
-    'external_id'?: string;
-    'upload_id'?: number;
-    'athlete'?: { id?: number };
-    'name'?: string;
-    'distance'?: number;
-    'moving_time'?: number;
-    'elapsed_time'?: number;
-    'total_elevation_gain'?: number;
-    'elev_high'?: number;
-    'elev_low'?: number;
-    'type'?: string;
-    'start_date'?: string;
-    'start_date_local'?: string;
-    'timezone'?: string;
-    'start_latlng'?: LatLng;
-    'end_latlng'?: LatLng;
-    'achievement_count'?: number;
-    'kudos_count'?: number;
-    'comment_count'?: number;
-    'athlete_count'?: number;
-    'photo_count'?: number;
-    'total_photo_count'?: number;
-    'map'?: IPolylineMap;
-    'trainer'?: boolean;
-    'commute'?: boolean;
-    'manual'?: boolean;
-    'private'?: boolean;
-    'flagged'?: boolean;
-    'workout_type'?: number;
-    'average_speed'?: number;
-    'max_speed'?: number;
-    'has_kudoed'?: boolean;
-}
+// export interface ISummaryActivity {
+//     'id'?: number;
+//     'external_id'?: string;
+//     'upload_id'?: number;
+//     'athlete'?: { id?: number };
+//     'name'?: string;
+//     'distance'?: number;
+//     'moving_time'?: number;
+//     'elapsed_time'?: number;
+//     'total_elevation_gain'?: number;
+//     'elev_high'?: number;
+//     'elev_low'?: number;
+//     'type'?: string;
+//     'start_date'?: string;
+//     'start_date_local'?: string;
+//     'timezone'?: string;
+//     'start_latlng'?: LatLng;
+//     'end_latlng'?: LatLng;
+//     'achievement_count'?: number;
+//     'kudos_count'?: number;
+//     'comment_count'?: number;
+//     'athlete_count'?: number;
+//     'photo_count'?: number;
+//     'total_photo_count'?: number;
+//     'map'?: IPolylineMap;
+//     'trainer'?: boolean;
+//     'commute'?: boolean;
+//     'manual'?: boolean;
+//     'private'?: boolean;
+//     'flagged'?: boolean;
+//     'workout_type'?: number;
+//     'average_speed'?: number;
+//     'max_speed'?: number;
+//     'has_kudoed'?: boolean;
+// }

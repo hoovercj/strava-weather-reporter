@@ -1,5 +1,8 @@
+// tslint:disable
 import * as React from 'react';
-import { IStrava, ISummaryActivity } from 'src/services/strava/strava';
+import { IActivityStatistic } from 'src/components/activity-statistic';
+import { StatisticGroup } from 'src/components/statistic-group';
+import { ISummaryActivity } from 'src/services/strava/strava';
 import {
     distanceInMetersToMileString,
     durationInSecondsToString,
@@ -7,53 +10,51 @@ import {
 } from 'src/utils/string-utils';
 import './index.css';
 
+import { Card } from 'src/components/card';
+
 export interface IActivitiesItemProps {
-    strava: IStrava;
     activity: ISummaryActivity;
 }
 
-export interface IActivitiesItemState {
-    activities: ISummaryActivity[];
-}
+// TODO: Get key at build time, swap keys for dev and production mode
+// See: https://medium.com/@benjiekibblewhite/dirt-simple-environment-variables-with-create-react-app-and-github-pages-1d9297df820d
+const GOOGLE_MAPS_API_KEY = 'AIzaSyAHXg5j04AT63ZKCYHeJVp1yrF3CoiiZ2I';
 
-export class ActivitiesItem extends React.Component<IActivitiesItemProps, IActivitiesItemState> {
+export class ActivitiesItem extends React.Component<IActivitiesItemProps> {
     public render() {
-        const classnameBase = 'activity-item_';
-        const nameClassname = `${classnameBase}name`;
-        const timeClassname = `${classnameBase}time`;
-        const statClassname = `${classnameBase}stat`;
-
         const activity = this.props.activity;
 
         const date = activity.start_date_local && new Date(activity.start_date_local).toDateString();
-        const distance = activity.distance && distanceInMetersToMileString(activity.distance);
-        const pace = activity.average_speed && metersPerSecondToMinutesPerMileString(activity.average_speed);
-        const time = activity.elapsed_time && durationInSecondsToString(activity.elapsed_time);
+        const name = this.props.activity.name;
+
+        const stats: IActivityStatistic[] = [{
+            name: 'Distance',
+            value: activity.distance && distanceInMetersToMileString(activity.distance) || '',
+        },{
+            name: 'Pace',
+            value: activity.average_speed && metersPerSecondToMinutesPerMileString(activity.average_speed) || '',
+        },{
+            name: 'Time',
+            value: activity.elapsed_time && durationInSecondsToString(activity.elapsed_time) || '',
+        }]
+
+        const map = activity.map && activity.map.summary_polyline;
 
         return (
-            <div>
-                { date &&
-                    <p>
-                        <span className={timeClassname}>Date: {date}</span>
-                    </p>
-                }
-                <p>
-                    <span className={nameClassname}>Name: {activity.name}</span>
-                </p>
-                <p>
-                    { distance &&
-                        <span className={statClassname}>Distance: {distance}</span>
-                    }
-                    { pace &&
-                        <span className={statClassname}>Speed: {pace}</span>
-                    }
-                    { time &&
-                        <span className={statClassname}>Time: {time}</span>
-                    }
-                </p>
-
-                <hr/>
-            </div>
-        )
+            <Card>
+                <div className={'activity-item_container'}>
+                    <div className={'activity-item_header-wrapper'}>
+                        <div className={'activity-item_name'}>{name}</div>
+                        <div className={'activity-item_date'}>{date}</div>
+                        <StatisticGroup statistics={stats} />
+                    </div>
+                    <div className={'activity-item_map-wrapper'}>
+                        { map &&
+                            <img className={'activity-item_map'} src={`http://maps.googleapis.com/maps/api/staticmap?sensor=false&size=300x200&path=weight:3%7Ccolor:red%7Cenc:${map}&key=${GOOGLE_MAPS_API_KEY}`} />
+                        }
+                    </div>
+                </div>
+            </Card>
+        );
     }
 }

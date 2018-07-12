@@ -14,9 +14,9 @@ export const distanceInMetersToMileString = (meters: number): string => {
 }
 
 export const metersPerSecondToMinutesPerMileString = (metersPerSecond: number): string => {
-    const minutesPerMileDecimal = metersPerSecond * 26.8224;
+    const minutesPerMileDecimal = metersPerSecond * 2.68224;
     const minutes = Math.trunc(minutesPerMileDecimal);
-    const seconds = Math.round((minutesPerMileDecimal % 1) * 60);
+    const seconds = leftPad(Math.round((minutesPerMileDecimal % 1) * 60), 2);
 
     return `${minutes}:${seconds} / mi`;
 }

@@ -79,6 +79,7 @@ class App extends React.Component<IAppProps, IAppState> {
                 }
             ]
         } else {
+            // TODO: Replace this with a "Connect to strava" button
             return [
                 {
                     key: 'page-sign-in',

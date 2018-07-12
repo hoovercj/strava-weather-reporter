@@ -1,0 +1,14 @@
+.statistic-group_container {
+    display: flex;
+}
+
+.statistic-group_stat-wrapper {
+    display: flex;
+}
+
+.statistic-group_separator {
+    height: 24px;
+    width: 0px;
+    margin: auto 16px;
+    border-right: 1px solid #e6e6eb;
+}

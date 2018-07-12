@@ -1,0 +1,17 @@
+.activity-statistic_container {
+    font-size: 20px;
+    line-height: 1.2;
+    display: flex;
+    flex-direction: column;
+}
+
+.activity-statistic_name {
+    color: #606065;
+    font-size: 12px;
+    font-weight: 400;
+}
+
+.activity-statistic_value {
+    font-weight: 400;
+    white-space: nowrap;
+}
