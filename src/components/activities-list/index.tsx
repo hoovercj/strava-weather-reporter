@@ -1,14 +1,11 @@
 import {
-    Button,
-    ConstrainMode,
-    DetailsList,
-    DetailsListLayoutMode,
-    IDetailsRowProps,
-    SelectionMode,
+    List,
+    PrimaryButton,
     Spinner,
 } from 'office-ui-fabric-react';
 import * as React from 'react';
 import  { ActivitiesItem } from 'src/components/activities-item';
+import  { ActivityDialog } from 'src/components/activity-dialog';
 import  { Card } from 'src/components/card';
 import {
     IStrava,
@@ -23,6 +20,7 @@ export interface IActivitiesListProps {
 }
 
 export interface IActivitiesListState {
+    activeActivity?: ISummaryActivity;
     activities: ISummaryActivity[];
     loadingComplete: boolean;
     nextPageToLoad: number;
@@ -58,50 +56,69 @@ export class ActivitiesList extends React.Component<IActivitiesListProps, IActiv
             ? this.state.activities
             : [...this.state.activities, null];
         return (
-            <DetailsList
-                isHeaderVisible={false}
-                enableShimmer={true}
-                selectionMode={SelectionMode.none}
-                constrainMode={ConstrainMode.horizontalConstrained}
-                layoutMode={DetailsListLayoutMode.justified}
-                items={items}
-                className={'activities-list_detailsListContainer'}
-                onRenderRow={this.renderRow}
-                onRenderMissingItem={this.onRenderMissingItem}
-            />
+            <div>
+                <List
+                    items={items}
+                    className={'activities-list_detailsListContainer'}
+                    onRenderCell={this.renderRow}
+                />
+                <ActivityDialog
+                    visible={!!this.state.activeActivity}
+                    onDismiss={this.onDialogDismiss}
+                    activity={this.state.activeActivity}
+                />
+            </div>
         );
     }
 
-    private onRenderMissingItem = (index?: number | undefined, rowProps?: IDetailsRowProps | undefined) => {
-        // TODO: Fetch more rows
-        this.fetchNextActivities();
+    private onDialogDismiss = () => {
+        this.setState({ activeActivity: undefined });
+    }
 
+    private onActivityClicked = (activity: ISummaryActivity): void => {
+        this.setState({ activeActivity: activity });
+    }
+
+    private renderRow = (item: any, index: number, isScrolling: boolean): JSX.Element | null => {
+        if (item) {
+            return this.renderActivitiesItem(item);
+        } else if (this.loading){
+            return this.renderLoadingSpinner();
+        } else if (this.state.loadingError) {
+            return this.renderErrorLoadingRowsButton();
+        } else if (!this.state.loadingComplete) {
+            return this.renderLoadMoreButton();
+        } else {
+            return null;
+        }
+    }
+
+    private renderActivitiesItem = (item: ISummaryActivity) => {
+        return <ActivitiesItem activity={item} onInvoked={this.onActivityClicked} />
+    }
+
+    private renderLoadingSpinner = () => {
+        return <Card><Spinner label={"Fetching activities..."} /></Card>;
+    }
+
+    private renderErrorLoadingRowsButton = () => {
         const errorButtonOnClick = () => {
             this.setState({
                 loadingError: null
-            });
+            }, this.fetchNextActivities);
         };
 
-        if (this.state.loadingError) {
-            return (
-                <Card>
-                    <p>An error occurred loading more rows.</p>
-                    <Button onClick={errorButtonOnClick}>Try Again</Button>
-                </Card>
-            )
-        } else {
-            return <Card><Spinner label={"Loading more activities..."} /></Card>;
-        }
-
+        return (
+            <Card>
+                <p>An error occurred fetching activities.</p>
+                <PrimaryButton onClick={errorButtonOnClick}>Try Again</PrimaryButton>
+            </Card>
+        )
     }
 
-    private renderRow = (props: IDetailsRowProps): JSX.Element => {
-        return <ActivitiesItem
-            activity={props.item}
-        />
+    private renderLoadMoreButton = () => {
+        return <PrimaryButton className={'activities-list_load-more-button'} onClick={this.fetchNextActivities}>Load More</PrimaryButton>
     }
-
-
 
     private fetchNextActivities = (): Promise<void> => {
         if (this.loading || this.state.loadingError) {
@@ -109,6 +126,8 @@ export class ActivitiesList extends React.Component<IActivitiesListProps, IActiv
             console.log('NOT fetching activities');
             return Promise.resolve();
         }
+
+        this.loading = true;
 
         // tslint:disable-next-line
         console.log('Fetching activities');

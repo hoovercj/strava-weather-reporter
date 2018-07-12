@@ -1,5 +1,9 @@
 .activities-list_detailsListContainer {
     margin: auto;
-    max-width: 80%;
+    max-width: 700px;
     background-color: inherit;
+}
+
+.activities-list_load-more-button {
+    margin-bottom: 12px;
 }
