@@ -1,13 +1,18 @@
 import {
-    Fabric,
     getTheme,
     ITheme,
     loadTheme,
 } from 'office-ui-fabric-react';
+// This is necessary for icons to appear in dialogs
+// TODO: Is it possible to only initialize some icons?
+import { initializeIcons } from 'office-ui-fabric-react/lib/Icons';
 import * as React from 'react';
+
 import { ActivitiesList } from 'src/components/activities-list';
+import connectWithStravaImage from 'src/connect_with_strava_orange.svg';
 import { IStrava, IUserInfo } from 'src/services/strava/strava';
 import './App.css';
+
 import {
     Header,
     IHeaderMenuItemProps,
@@ -40,6 +45,7 @@ class App extends React.Component<IAppProps, IAppState> {
 
     public componentDidMount(): void {
         loadTheme(this.getCustomTheme());
+        initializeIcons();
 
         // If we already have user info, then great!
         // Clear any query string info though, as we don't need it
@@ -60,14 +66,12 @@ class App extends React.Component<IAppProps, IAppState> {
 
     public render() {
         return (
-            <Fabric>
-                <div className="App">
-                    <Header {...this.getHeaderProps()} />
-                    { this.state.userInfo &&
-                        <ActivitiesList strava={this.props.strava} />
-                    }
-                </div>
-            </Fabric>
+            <div className="App">
+                <Header {...this.getHeaderProps()} />
+                { this.state.userInfo &&
+                    <ActivitiesList strava={this.props.strava} />
+                }
+            </div>
         );
     }
 
@@ -111,7 +115,7 @@ class App extends React.Component<IAppProps, IAppState> {
         this.setState({
             ...this.state,
             error,
-        })
+        });
     }
 
     private handleUserInformation = (info: IUserInfo): void => {
@@ -137,10 +141,7 @@ class App extends React.Component<IAppProps, IAppState> {
                 themeDarker: '#a63201',
                 themePrimary: '#fc4c02',
             },
-            semanticColors: {
-                ...currentTheme.semanticColors,
-                link: 'currentColor',
-            },
+            semanticColors: currentTheme.semanticColors,
         };
     }
 }

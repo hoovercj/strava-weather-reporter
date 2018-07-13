@@ -7,7 +7,6 @@
 
 .activity-item_header-wrapper {
     display: flex;
-    flex-grow: 1;
     flex-direction: column;
     justify-content: flex-end;
 }
@@ -24,6 +23,7 @@
     line-height: 1.333;
     letter-spacing: -0.02rem;
     margin-bottom: 6px;
+    color: currentColor; /* This is a link, but avoid changing the color unless hovered or focused */
 }
 
 .activity-item_map-wrapper {
