@@ -1,12 +1,12 @@
 import {
     List,
-    PrimaryButton,
     Spinner,
 } from 'office-ui-fabric-react';
 import * as React from 'react';
 import  { ActivitiesItem } from 'src/components/activities-item';
 import  { ActivityDialog } from 'src/components/activity-dialog';
 import  { Card } from 'src/components/card';
+import { ThemedButton } from 'src/components/themed-button';
 import {
     IStrava,
     ISummaryActivity,
@@ -14,35 +14,37 @@ import {
 
 import './index.css';
 
+enum LoadingState {
+    Ready,
+    Complete,
+    Loading,
+    Error,
+}
+
 export interface IActivitiesListProps {
-    strava: IStrava
+    strava: IStrava;
     itemsPerPage?: number;
 }
 
 export interface IActivitiesListState {
     activeActivity?: ISummaryActivity;
     activities: ISummaryActivity[];
-    loadingComplete: boolean;
     nextPageToLoad: number;
-    loadingError: any;
+    loadingState: LoadingState;
 }
 
 export class ActivitiesList extends React.Component<IActivitiesListProps, IActivitiesListState> {
     private readonly now = Date.now();
 
-    private loading = false;
-
     constructor(props: IActivitiesListProps) {
         super(props);
-
         this.state = {
             activities: [], // this.props.strava.cachedUserActivities()
                             // TODO: How should caching and paging work together?
                             // I can't just restore the cache because when new data is loaded,
                             // I would have to merge/de-dupe with what I already have.
                             // For now I will take the simpler approach and simply not cache it
-            loadingComplete: false,
-            loadingError: undefined,
+            loadingState: LoadingState.Ready,
             nextPageToLoad: 1,
         };
     }
@@ -52,7 +54,7 @@ export class ActivitiesList extends React.Component<IActivitiesListProps, IActiv
     }
 
     public render() {
-        const items = this.state.loadingComplete
+        const items = this.state.loadingState === LoadingState.Complete
             ? this.state.activities
             : [...this.state.activities, null];
         return (
@@ -71,6 +73,22 @@ export class ActivitiesList extends React.Component<IActivitiesListProps, IActiv
         );
     }
 
+    // private isLoadingComplete = () => {
+    //     return this.state.loadingState === LoadingState.Complete;
+    // }
+
+    // private isLoadingError = () => {
+    //     return this.state.loadingState === LoadingState.Error;
+    // }
+
+    // private isLoadingReady = () => {
+    //     return this.state.loadingState === LoadingState.Ready;
+    // }
+
+    private isLoading = () => {
+        return this.state.loadingState === LoadingState.Loading;
+    }
+
     private onDialogDismiss = () => {
         this.setState({ activeActivity: undefined });
     }
@@ -82,14 +100,17 @@ export class ActivitiesList extends React.Component<IActivitiesListProps, IActiv
     private renderRow = (item: any, index: number, isScrolling: boolean): JSX.Element | null => {
         if (item) {
             return this.renderActivitiesItem(item);
-        } else if (this.loading){
-            return this.renderLoadingSpinner();
-        } else if (this.state.loadingError) {
-            return this.renderErrorLoadingRowsButton();
-        } else if (!this.state.loadingComplete) {
-            return this.renderLoadMoreButton();
-        } else {
-            return null;
+        }
+
+        switch (this.state.loadingState) {
+            case LoadingState.Complete:
+                return null;
+            case LoadingState.Error:
+                return this.renderErrorLoadingRowsButton();
+            case LoadingState.Ready:
+                return this.renderLoadMoreButton();
+            case LoadingState.Loading:
+                return this.renderLoadingSpinner();
         }
     }
 
@@ -104,63 +125,62 @@ export class ActivitiesList extends React.Component<IActivitiesListProps, IActiv
     private renderErrorLoadingRowsButton = () => {
         const errorButtonOnClick = () => {
             this.setState({
-                loadingError: null
+                loadingState: LoadingState.Ready
             }, this.fetchNextActivities);
         };
 
         return (
             <Card>
                 <p>An error occurred fetching activities.</p>
-                <PrimaryButton onClick={errorButtonOnClick}>Try Again</PrimaryButton>
+                { /* Use color #fc4c02 */ }
+                <ThemedButton primary={true} onClick={errorButtonOnClick}>Try Again</ThemedButton>
             </Card>
         )
     }
 
     private renderLoadMoreButton = () => {
-        return <PrimaryButton className={'activities-list_load-more-button'} onClick={this.fetchNextActivities}>Load More</PrimaryButton>
+        // Use color: #fc4c02
+        return <ThemedButton  primary={true} className={'activities-list_load-more-button'} onClick={this.fetchNextActivities}>Load More</ThemedButton>
     }
 
-    private fetchNextActivities = (): Promise<void> => {
-        if (this.loading || this.state.loadingError) {
-            // tslint:disable-next-line
-            console.log('NOT fetching activities');
-            return Promise.resolve();
+    private fetchNextActivities = (): void => {
+        if (this.isLoading()) {
+            return;
         }
 
-        this.loading = true;
+        this.setState({
+            loadingState: LoadingState.Loading
+        }, this.fetchActivitiesCore)
+    }
 
-        // tslint:disable-next-line
-        console.log('Fetching activities');
+    private fetchActivitiesCore = () => {
         return this.props.strava.activitiesApi.getLoggedInAthleteActivities(
             this.now, /* before */
             undefined, /* after */
             this.state.nextPageToLoad, /* page */
-            this.props.itemsPerPage, /* perPage */
+            2, // this.props.itemsPerPage, /* perPage */
             undefined, /* options: none */
         ).then(activities => {
             let state: IActivitiesListState = this.state;
             if (activities.length > 0) {
-                // tslint:disable-next-line
-                console.log('Loaded activities')
                 state = {
                     ...state,
                     activities: this.state.activities.concat(activities),
+                    loadingState: LoadingState.Ready,
                     nextPageToLoad: this.state.nextPageToLoad + 1,
                 };
             } else {
-                // tslint:disable-next-line
-                console.log('Loading complete')
                 state = {
                     ...state,
-                    loadingComplete: true,
+                    loadingState: LoadingState.Complete,
                 };
             }
 
-            this.setState(state, () => { this.loading = false });
+            this.setState(state);
         }).catch(error => {
             this.setState({
-                loadingError: error,
-            }, () => this.loading = false );
+                loadingState: LoadingState.Error,
+            });
         });
     }
 }

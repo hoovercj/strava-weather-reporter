@@ -43,6 +43,14 @@ export interface IUserInfo {
 
 export class Strava implements IStrava {
 
+    public static getStravaUrl = () => {
+        return 'https://www.strava.com';
+    }
+
+    public static getUrlForActivity = (id: string | number) => {
+        return `${Strava.getStravaUrl()}/activities/${id}`;
+    }
+
     public get activitiesApi(): ActivitiesApi {
         return this._activitiesApi;
     }

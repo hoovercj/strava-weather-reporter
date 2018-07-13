@@ -46,6 +46,7 @@ export class ActivitiesItem extends React.Component<IActivitiesItemProps> {
             <Card>
                 <div className={'activity-item_container'}>
                     <div className={'activity-item_header-wrapper'}>
+                        { /* Use color: #007FB6; for hover, otherwise normal color */ }
                         <Link onClick={this.onInvoked} className={'activity-item_name'}>{name}</Link>
                         <div className={'activity-item_date'}>{date}</div>
                         <StatisticGroup statistics={stats} />

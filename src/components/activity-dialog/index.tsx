@@ -2,11 +2,14 @@ import {
     Dialog,
     DialogContent,
     DialogFooter,
-    DialogType
+    DialogType,
+    Link,
 } from 'office-ui-fabric-react';
 import * as React from 'react';
 
+import { ThemedButton } from 'src/components/themed-button';
 import { SummaryActivity } from 'src/lib/strava';
+import { Strava } from 'src/services/strava/strava';
 
 export interface IActivityDialogProps {
     visible: boolean;
@@ -23,15 +26,21 @@ export class ActivityDialog extends React.Component<IActivityDialogProps> {
 
         return (
             <Dialog
-                type={DialogType.normal}
+                type={DialogType.close}
                 hidden={!this.props.visible}
                 onDismiss={this.props.onDismiss}
                 title={`Edit Activity Description`}
                 >
                 <DialogContent>
-                    <h1>{this.props.activity.name}</h1>
+                    Update description to the content below for activity <Link href={Strava.getUrlForActivity(this.props.activity.id || '')} >{this.props.activity.name}</Link>
                 </DialogContent>
-                <DialogFooter/>
+                <DialogContent>
+                    New description here.
+                </DialogContent>
+                <DialogFooter>
+                    <ThemedButton primary={true} onClick={this.props.onDismiss} text="Update description" />
+                    <ThemedButton onClick={this.props.onDismiss} text="Cancel" />
+                </DialogFooter>
             </Dialog>
         )
     }
