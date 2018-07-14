@@ -39,11 +39,7 @@ export class ActivitiesList extends React.Component<IActivitiesListProps, IActiv
     constructor(props: IActivitiesListProps) {
         super(props);
         this.state = {
-            activities: [], // this.props.strava.cachedUserActivities()
-                            // TODO: How should caching and paging work together?
-                            // I can't just restore the cache because when new data is loaded,
-                            // I would have to merge/de-dupe with what I already have.
-                            // For now I will take the simpler approach and simply not cache it
+            activities: [],
             loadingState: LoadingState.Ready,
             nextPageToLoad: 1,
         };

@@ -1,0 +1,15 @@
+.page-footer_container {
+    padding: 20px;
+    display: flex;
+    background-color: white;
+    justify-content: space-between;
+}
+
+.page-footer_column {
+    display: flex;
+    align-items: center;
+}
+
+.page-footer_image-button_powered-by {
+    width: 100px;
+}
