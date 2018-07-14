@@ -30,7 +30,9 @@ export class ActivityDialog extends React.Component<IActivityDialogProps> {
 
         return (
             <Dialog
-                type={DialogType.normal}
+                dialogContentProps={{
+                    type: DialogType.normal,
+                }}
                 hidden={!this.props.visible}
                 onDismiss={this.props.onDismiss}
                 modalProps={{
@@ -39,7 +41,7 @@ export class ActivityDialog extends React.Component<IActivityDialogProps> {
                     isDarkOverlay: true,
                 }}
             >
-                {/* TODO: ensure that this is ready by a screenreader when opening the dialog */}
+                {/* TODO: ensure that this is read by a screenreader when opening the dialog */}
                 <h1 className={'activity-dialog_title'} id={titleId}>Edit Activity Description</h1>
                 <p>
                     Update description to the content below for activity <Link href={Strava.getUrlForActivity(this.props.activity.id || '') } >{this.props.activity.name}</Link>
