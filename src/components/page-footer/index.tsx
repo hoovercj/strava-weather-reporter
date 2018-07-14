@@ -29,7 +29,7 @@ export class PageFooter extends React.Component<IPageFooterProps> {
                     />
                     <ImageButton
                         className={'page-footer_image-button_powered-by'}
-                        href={'https://darksky.net'}
+                        href={'https://darksky.net/poweredby/'}
                         aria-label={'Powered by Dark Sky'}
                         src={poweredByDarkSky}
                     />

@@ -128,14 +128,12 @@ export class ActivitiesList extends React.Component<IActivitiesListProps, IActiv
         return (
             <Card>
                 <p>An error occurred fetching activities.</p>
-                { /* Use color #fc4c02 */ }
                 <ThemedButton primary={true} onClick={errorButtonOnClick}>Try Again</ThemedButton>
             </Card>
         )
     }
 
     private renderLoadMoreButton = () => {
-        // Use color: #fc4c02
         return <ThemedButton  primary={true} className={'activities-list_load-more-button'} onClick={this.fetchNextActivities}>Load More</ThemedButton>
     }
 
