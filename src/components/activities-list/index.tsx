@@ -6,12 +6,14 @@ import * as React from 'react';
 import  { ActivitiesItem } from 'src/components/activities-item';
 import  { ActivityDialog } from 'src/components/activity-dialog';
 import  { Card } from 'src/components/card';
+import { LoadingOverlay } from 'src/components/loading-overlay';
 import { ThemedButton } from 'src/components/themed-button';
+import { SummaryActivity } from 'src/lib/strava';
 import {
     IStrava,
     ISummaryActivity,
+    ISummaryActivityWithDescription,
 } from 'src/services/strava/strava';
-
 import './index.css';
 
 enum LoadingState {
@@ -26,8 +28,13 @@ export interface IActivitiesListProps {
     itemsPerPage?: number;
 }
 
+export interface ISummaryActivityWithDescription extends ISummaryActivity {
+    description: string;
+}
+
 export interface IActivitiesListState {
-    activeActivity?: ISummaryActivity;
+    loadingActivity?: ISummaryActivity;
+    activeActivity?: ISummaryActivityWithDescription;
     activities: ISummaryActivity[];
     nextPageToLoad: number;
     loadingState: LoadingState;
@@ -50,47 +57,113 @@ export class ActivitiesList extends React.Component<IActivitiesListProps, IActiv
     }
 
     public render() {
-        const items = this.state.loadingState === LoadingState.Complete
-            ? this.state.activities
-            : [...this.state.activities, null];
         return (
             <div>
-                <List
-                    items={items}
-                    className={'activities-list_detailsListContainer'}
-                    onRenderCell={this.renderRow}
-                />
-                <ActivityDialog
-                    visible={!!this.state.activeActivity}
-                    onDismiss={this.onDialogDismiss}
-                    activity={this.state.activeActivity}
-                />
+                {this.renderActivitiesList()}
+                {this.renderLoadingActivityOverlay()}
+                {this.renderActivityDialog()}
             </div>
         );
     }
 
-    // private isLoadingComplete = () => {
-    //     return this.state.loadingState === LoadingState.Complete;
-    // }
+    private renderActivitiesList = () => {
+        const items = this.state.loadingState === LoadingState.Complete
+            ? this.state.activities
+            : [...this.state.activities, null];
 
-    // private isLoadingError = () => {
-    //     return this.state.loadingState === LoadingState.Error;
-    // }
+        return (
+            <List
+                items={items}
+                className={'activities-list_detailsListContainer'}
+                onRenderCell={this.renderRow}
+            />
+        );
+    }
 
-    // private isLoadingReady = () => {
-    //     return this.state.loadingState === LoadingState.Ready;
-    // }
+    private isLoadingActivityDescription = (): boolean => {
+        return !!this.state.loadingActivity;
+    }
 
-    private isLoading = () => {
+    private isLoadingActivities = (): boolean => {
         return this.state.loadingState === LoadingState.Loading;
     }
 
     private onDialogDismiss = () => {
-        this.setState({ activeActivity: undefined });
+        console.log('onDialogDismiss');
+        return Promise.resolve(this.setState({ activeActivity: undefined }));
     }
 
-    private onActivityClicked = (activity: ISummaryActivity): void => {
-        this.setState({ activeActivity: activity });
+    private onDialogApprove = async (activity: ISummaryActivityWithDescription) => {
+        // TODO: update active activity description
+        console.log('onDialogApprove');
+
+        // No activity to update. Easy!
+        if (!activity || !activity.id) {
+            return;
+        }
+
+        // Don't update the activity if it has changed
+        // to avoid updating the wrong one
+        if (this.state.activeActivity !== activity) {
+            return;
+        }
+
+        try {
+            await this.props.strava.updateDescriptionForActivity(String(activity.id));
+        } catch {
+            // TODO: logging, show error
+        }
+        return Promise.resolve(this.setState({ activeActivity: undefined }));
+    }
+
+    private onActivityClicked = (activity: ISummaryActivity) => {
+        // Don't try to load multiple activities
+        console.log('onActivityClicked');
+        if (this.isLoadingActivityDescription()) {
+            console.log('onActivityClicked -- already loading activity');
+            return;
+        }
+
+        // Can't load an activity if it doesn't have the right information
+        if (!activity.id) {
+            console.log('onActivityClicked -- no activity id');
+            return;
+        }
+
+        this.setState({ loadingActivity: activity }, () => this.fetchActivityDescription(activity))
+    }
+
+    private fetchActivityDescription = async (activity: SummaryActivity) => {
+        console.log('fetchActivityDescription');
+
+        try {
+            const description = await this.props.strava.getDescriptionForActivity(String(activity.id));
+
+            console.log('fetchActivityDescription -- description fetched:');
+            console.log(description);
+
+            // Somehow the loading activity is not the one that this function
+            // was asked to load, so abandon this request
+            if (this.state.loadingActivity !== activity) {
+                console.log('fetchActivityDescription -- loadingActivity is not this activity')
+                return;
+            }
+
+            const activeActivity: ISummaryActivityWithDescription | undefined = description
+            ? { ...activity, description }
+            : undefined;
+
+            this.setState({
+                activeActivity,
+                loadingActivity: undefined,
+            });
+        } catch {
+            // TODO: logging
+
+            this.setState({
+                loadingActivity: undefined,
+            });
+        }
     }
 
     private renderRow = (item: any, index: number, isScrolling: boolean): JSX.Element | null => {
@@ -137,8 +210,45 @@ export class ActivitiesList extends React.Component<IActivitiesListProps, IActiv
         return <ThemedButton  primary={true} className={'activities-list_load-more-button'} onClick={this.fetchNextActivities}>Load More</ThemedButton>
     }
 
+    private renderLoadingActivityOverlay = () => {
+        if (!this.state.loadingActivity) {
+            return;
+        }
+
+        return (
+            <LoadingOverlay
+                onClick={this.onLoadingActivityOverlayClicked}
+            />
+        )
+    }
+
+    private onLoadingActivityOverlayClicked = () => {
+        console.log('onLoadingActivityOverlayClicked');
+        if (this.state.loadingActivity) {
+            console.log('onLoadingActivityOverlayClicked -- setting state');
+            this.setState({ loadingActivity: undefined });
+        }
+    }
+
+    private renderActivityDialog = () => {
+        const activity = this.state.activeActivity;
+
+        if (!activity) {
+            return null;
+        }
+
+        return (
+            <ActivityDialog
+                visible={!!activity}
+                onDismiss={this.onDialogDismiss}
+                onApprove={this.onDialogApprove}
+                activity={activity}
+            />
+        )
+    }
+
     private fetchNextActivities = (): void => {
-        if (this.isLoading()) {
+        if (this.isLoadingActivities()) {
             return;
         }
 

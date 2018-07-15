@@ -10,16 +10,35 @@ import * as React from 'react';
 import './index.css';
 
 import { ThemedButton } from 'src/components/themed-button';
-import { SummaryActivity } from 'src/lib/strava';
-import { Strava } from 'src/services/strava/strava';
+import {
+    ISummaryActivityWithDescription,
+    Strava,
+} from 'src/services/strava/strava';
+import { ICancelablePromise, makeCancelable } from 'src/utils/promise-utils';
 
 export interface IActivityDialogProps {
     visible: boolean;
-    onDismiss: () => void;
-    activity?: SummaryActivity;
+    onApprove: (activity: ISummaryActivityWithDescription) => Promise<void>;
+    onDismiss: () => Promise<void>;
+    activity: ISummaryActivityWithDescription;
 }
 
-export class ActivityDialog extends React.Component<IActivityDialogProps> {
+export interface IActivityDialogState {
+    busy: boolean;
+}
+
+export class ActivityDialog extends React.Component<IActivityDialogProps, IActivityDialogState> {
+
+    private cancelables: ICancelablePromise[] = [];
+
+    constructor(props: IActivityDialogProps) {
+        super(props);
+        this.state = { busy: false }
+    }
+
+    public componentWillUnmount() {
+        this.cancelables.forEach(cancelable => cancelable.cancel());
+    }
 
     public render() {
         if (!this.props.activity) {
@@ -48,15 +67,65 @@ export class ActivityDialog extends React.Component<IActivityDialogProps> {
                 </p>
                 <TextField
                     readOnly={true}
-                    value={'New description here'}
+                    value={this.props.activity.description}
                     multiline={true}
                     aria-labelledby={titleId}
                 />
                 <DialogFooter>
-                    <ThemedButton primary={true} onClick={this.props.onDismiss} text="Update description" />
-                    <ThemedButton onClick={this.props.onDismiss} text="Cancel" />
+                    <ThemedButton disabled={this.state.busy} primary={true} onClick={this.onApproveButtonClicked} text="Update description" />
+                    <ThemedButton disabled={this.state.busy} onClick={this.onDismissButtonClicked} text="Cancel" />
                 </DialogFooter>
             </Dialog>
         )
+    }
+
+    private onDismissButtonClicked = () => {
+        // Nothing to do, great!
+        if (!this.props.onDismiss) {
+            return;
+        }
+
+        // Ignore if dialog is already busy
+        if (this.state.busy) {
+            return;
+        }
+
+        this.setState({ busy: true }, this.onDismissButtonClickedCore);
+    }
+
+    private onDialogButtonClickedCore = (promise: Promise<any>) => {
+        const cancelablePromise = makeCancelable(promise);
+        this.cancelables.push(cancelablePromise);
+        cancelablePromise.promise
+            .then(() => {
+                this.cancelables.splice(this.cancelables.indexOf(cancelablePromise), 1);
+                if (this.state.busy) {
+                    this.setState({ busy: false });
+                }
+            }).catch(error => null);
+    }
+
+    private onDismissButtonClickedCore = async () => {
+        this.onDialogButtonClickedCore(this.props.onDismiss());
+    }
+
+    private onApproveButtonClicked = () => {
+        // Nothing to do, great!
+        if (!this.props.onApprove) {
+            return;
+        }
+
+        // Ignore if dialog is already busy
+        if (this.state.busy) {
+            return;
+        }
+
+        this.setState({ busy: true }, this.onApproveButtonClickedCore);
+    }
+
+    // TODO: Clicking on buttons can occur after component has unmounted
+    // React warns about possible memory leaks
+    private onApproveButtonClickedCore = async () => {
+        this.onDialogButtonClickedCore(this.props.onApprove(this.props.activity));
     }
 }

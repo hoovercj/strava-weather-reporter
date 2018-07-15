@@ -8,6 +8,10 @@ import { IStorage } from 'src/services/storage';
 export type IActivitiesApi = ActivitiesApi;
 export type ISummaryActivity = SummaryActivity;
 
+export interface ISummaryActivityWithDescription extends ISummaryActivity {
+    description: string;
+}
+
 type primitive = string | number | boolean;
 
 export interface IStravaConfiguration {
@@ -18,12 +22,12 @@ export interface IStravaConfiguration {
 
 export interface IStrava {
     activitiesApi: ActivitiesApi;
+    getDescriptionForActivity(id: string): Promise<string>;
+    updateDescriptionForActivity(id: string): Promise<string>;
     exchangeCodeForUserInformation(code: string): Promise<IUserInfo>;
     redirectToStravaAuthorizationPage(): void;
     cachedUserInformation(): IUserInfo | undefined;
     clearCachedInformation(): void;
-    // cachedUserActivities(): ISummaryActivity[];
-    // fetchUserActivities(): Promise<ISummaryActivity[]>
 }
 
 export interface IStravaAuthenticationResponse {
@@ -69,34 +73,6 @@ export class Strava implements IStrava {
 
     public getActivitiesApi = (): ActivitiesApi => this.activitiesApi;
 
-
-    // public fetchUserActivities = (): Promise<ISummaryActivity[]> => {
-    //     const authInfo = this.cachedStravaAuthInfo();
-    //     const token = authInfo && authInfo.access_token;
-
-    //     if (!token) {
-    //         return Promise.resolve([]);
-    //     }
-
-    //     const authUrl = `${this.config.backendUri}/activities`;
-    //     const params = {
-    //         token,
-    //     };
-    //     const url = this.getUrlWithParams(authUrl, params);
-    //     // TODO: Do I need a fetch polyfill?
-    //     return fetch(url)
-    //         .then(response => response.json())
-    //         .then(JSON.parse)
-    //         .then((stravaResponse: ISummaryActivity[]) => {
-    //             this.setCachedValue(this.STRAVA_USER_ACTIVITIES_STORAGE_KEY, stravaResponse);
-    //             return stravaResponse;
-    //         });
-    // }
-
-    // public cachedUserActivities = (): ISummaryActivity[] => {
-    //     return this.getCachedValue<ISummaryActivity[]>(this.STRAVA_USER_ACTIVITIES_STORAGE_KEY);
-    // }
-
     public cachedUserInformation = (): IUserInfo => {
         const stravaResponse = this.cachedStravaAuthInfo();
 
@@ -109,19 +85,42 @@ export class Strava implements IStrava {
         this.storage.clear();
     }
 
-    public exchangeCodeForUserInformation = (code: string): Promise<IUserInfo> => {
+    public exchangeCodeForUserInformation = async (code: string): Promise<IUserInfo> => {
         const authUrl = `${this.config.backendUri}/auth`;
         const params = {
             code,
         };
         const url = this.getUrlWithParams(authUrl, params);
         // TODO: Do I need a fetch polyfill?
+
         return fetch(url, { method: 'POST' })
             .then(response => response.json())
             .then((stravaResponse: IStravaAuthenticationResponse) => {
                 this.setCachedValue(this.STRAVA_AUTH_INFO_STORAGE_KEY, stravaResponse);
                 return stravaResponse.athlete;
             });
+    }
+
+    public getDescriptionForActivity = async (id: string): Promise<string> => {
+        return this.descriptionForActivityCore(id, 'get');
+    }
+
+    public updateDescriptionForActivity = async (id: string): Promise<string> => {
+        return this.descriptionForActivityCore(id, 'post');
+    }
+
+    public descriptionForActivityCore = async (id: string, method: string): Promise<string> => {
+        const descriptionUrl = `${this.config.backendUri}/getdescription`;
+        const params = {
+            id,
+            token: this.getAuthToken(),
+        }
+        const url = this.getUrlWithParams(descriptionUrl, params);
+
+        const response = await fetch(url, { method });
+        return response.status === 200
+            ? response.text()
+            : '';
     }
 
     public redirectToStravaAuthorizationPage = () => {
