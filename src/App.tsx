@@ -33,6 +33,7 @@ interface IAppProps {
     copyrightInfo: ICopyrightInfo;
     name: string,
     strava: IStrava,
+    activitiesPerPage: number,
 }
 
 interface IAppState {
@@ -95,7 +96,10 @@ class App extends React.Component<IAppProps, IAppState> {
         return (
             <div className="app_content">
                 { this.state.userInfo &&
-                    <ActivitiesList strava={this.props.strava} />
+                    <ActivitiesList
+                        itemsPerPage={this.props.activitiesPerPage}
+                        strava={this.props.strava}
+                    />
                 }
             </div>
         );

@@ -63,9 +63,7 @@ export class Strava implements IStrava {
 
     private cache: { [key: string]: any } = {};
 
-
     private readonly STRAVA_AUTH_INFO_STORAGE_KEY = 'STRAVA_AUTH_INFO';
-    // private readonly STRAVA_USER_ACTIVITIES_STORAGE_KEY = 'STRAVA_USER_ACTIVITIES';
 
     constructor(private config: IStravaConfiguration, private storage: IStorage) {
         const apiConfig: Configuration = { accessToken: this.getAuthToken };
@@ -175,47 +173,3 @@ export class Strava implements IStrava {
         return `${url}?${paramsString}`;
     }
 }
-
-// export type LatLng = [number, number];
-
-// export interface IPolylineMap {
-//     'id'?: string;
-//     'polyline'?: string;
-//     'summary_polyline'?: string;
-// }
-
-// export interface ISummaryActivity {
-//     'id'?: number;
-//     'external_id'?: string;
-//     'upload_id'?: number;
-//     'athlete'?: { id?: number };
-//     'name'?: string;
-//     'distance'?: number;
-//     'moving_time'?: number;
-//     'elapsed_time'?: number;
-//     'total_elevation_gain'?: number;
-//     'elev_high'?: number;
-//     'elev_low'?: number;
-//     'type'?: string;
-//     'start_date'?: string;
-//     'start_date_local'?: string;
-//     'timezone'?: string;
-//     'start_latlng'?: LatLng;
-//     'end_latlng'?: LatLng;
-//     'achievement_count'?: number;
-//     'kudos_count'?: number;
-//     'comment_count'?: number;
-//     'athlete_count'?: number;
-//     'photo_count'?: number;
-//     'total_photo_count'?: number;
-//     'map'?: IPolylineMap;
-//     'trainer'?: boolean;
-//     'commute'?: boolean;
-//     'manual'?: boolean;
-//     'private'?: boolean;
-//     'flagged'?: boolean;
-//     'workout_type'?: number;
-//     'average_speed'?: number;
-//     'max_speed'?: number;
-//     'has_kudoed'?: boolean;
-// }

@@ -25,7 +25,7 @@ enum LoadingState {
 
 export interface IActivitiesListProps {
     strava: IStrava;
-    itemsPerPage?: number;
+    itemsPerPage: number;
 }
 
 export interface ISummaryActivityWithDescription extends ISummaryActivity {
@@ -261,7 +261,7 @@ export class ActivitiesList extends React.Component<IActivitiesListProps, IActiv
             this.now, /* before */
             undefined, /* after */
             this.state.nextPageToLoad, /* page */
-            2, // this.props.itemsPerPage, /* perPage */
+            this.props.itemsPerPage, /* perPage */
             undefined, /* options: none */
         ).then(activities => {
             let state: IActivitiesListState = this.state;
