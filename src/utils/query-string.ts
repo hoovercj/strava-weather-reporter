@@ -3,5 +3,5 @@ export const getQueryStringValue = (key: string): string => {
 }
 
 export const clearQueryString = (): void => {
-    window.history.replaceState({}, document.title, '/');
+    window.history.replaceState({}, document.title, document.location.pathname);
 }
