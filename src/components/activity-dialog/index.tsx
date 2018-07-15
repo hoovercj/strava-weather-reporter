@@ -63,7 +63,7 @@ export class ActivityDialog extends React.Component<IActivityDialogProps, IActiv
                 {/* TODO: ensure that this is read by a screenreader when opening the dialog */}
                 <h1 className={'activity-dialog_title'} id={titleId}>Edit Activity Description</h1>
                 <p>
-                    Update description to the content below for activity <Link href={Strava.getUrlForActivity(this.props.activity.id || '') } >{this.props.activity.name}</Link>
+                    Update description to the content below for activity {this.renderActivityLink()}
                 </p>
                 <TextField
                     readOnly={true}
@@ -76,6 +76,18 @@ export class ActivityDialog extends React.Component<IActivityDialogProps, IActiv
                     <ThemedButton disabled={this.state.busy} onClick={this.onDismissButtonClicked} text="Cancel" />
                 </DialogFooter>
             </Dialog>
+        )
+    }
+
+    private renderActivityLink = () => {
+        return (
+            <Link
+                href={Strava.getUrlForActivity(this.props.activity.id || '') }
+                rel="noopener noreferrer"
+                target="_blank"
+            >
+                {this.props.activity.name}
+            </Link>
         )
     }
 
@@ -123,8 +135,6 @@ export class ActivityDialog extends React.Component<IActivityDialogProps, IActiv
         this.setState({ busy: true }, this.onApproveButtonClickedCore);
     }
 
-    // TODO: Clicking on buttons can occur after component has unmounted
-    // React warns about possible memory leaks
     private onApproveButtonClickedCore = async () => {
         this.onDialogButtonClickedCore(this.props.onApprove(this.props.activity));
     }

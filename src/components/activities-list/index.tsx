@@ -94,7 +94,6 @@ export class ActivitiesList extends React.Component<IActivitiesListProps, IActiv
     }
 
     private onDialogApprove = async (activity: ISummaryActivityWithDescription) => {
-        // TODO: update active activity description
         console.log('onDialogApprove');
 
         // No activity to update. Easy!

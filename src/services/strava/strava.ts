@@ -15,9 +15,10 @@ export interface ISummaryActivityWithDescription extends ISummaryActivity {
 type primitive = string | number | boolean;
 
 export interface IStravaConfiguration {
+    backendCode: string;
+    backendUrl: string;
     clientId: number;
     stravaCodeRedirectUri: string;
-    backendUri: string;
 }
 
 export interface IStrava {
@@ -85,13 +86,13 @@ export class Strava implements IStrava {
         this.storage.clear();
     }
 
-    public exchangeCodeForUserInformation = async (code: string): Promise<IUserInfo> => {
-        const authUrl = `${this.config.backendUri}/auth`;
+    public exchangeCodeForUserInformation = async (stravaCode: string): Promise<IUserInfo> => {
+        const authUrl = `${this.config.backendUrl}/auth`;
         const params = {
-            code,
+            code: this.config.backendCode,
+            stravacode: stravaCode,
         };
         const url = this.getUrlWithParams(authUrl, params);
-        // TODO: Do I need a fetch polyfill?
 
         return fetch(url, { method: 'POST' })
             .then(response => response.json())
@@ -110,8 +111,9 @@ export class Strava implements IStrava {
     }
 
     public descriptionForActivityCore = async (id: string, method: string): Promise<string> => {
-        const descriptionUrl = `${this.config.backendUri}/getdescription`;
+        const descriptionUrl = `${this.config.backendUrl}/getdescription`;
         const params = {
+            code: this.config.backendCode,
             id,
             token: this.getAuthToken(),
         }

@@ -17,8 +17,7 @@ export class PageFooter extends React.Component<IPageFooterProps> {
         return (
             <div className={'page-footer_container'}>
                 <div className={'page-footer_column'}>
-                    {/* TODO: get spacing between 2018 and the link */}
-                    {'© 2018'}<Link href={this.props.copyrightInfo.url}>{this.props.copyrightInfo.name}</Link>
+                    {'© 2018\u00a0'}<Link href={this.props.copyrightInfo.url}>{this.props.copyrightInfo.name}</Link>
                 </div>
                 <div className={'page-footer_column'}>
                     <ImageButton
@@ -26,12 +25,16 @@ export class PageFooter extends React.Component<IPageFooterProps> {
                         href={'https://www.strava.com'}
                         aria-label={'Powered by Strava'}
                         src={poweredByStrava}
+                        rel="noopener noreferrer"
+                        target="_blank"
                     />
                     <ImageButton
                         className={'page-footer_image-button_powered-by'}
                         href={'https://darksky.net/poweredby/'}
                         aria-label={'Powered by Dark Sky'}
                         src={poweredByDarkSky}
+                        rel="noopener noreferrer"
+                        target="_blank"
                     />
                 </div>
             </div>

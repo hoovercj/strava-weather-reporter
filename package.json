@@ -1,7 +1,14 @@
 {
     "name": "strava-weather",
+    "homepage": "https://www.codyhoover.com/strava-weatherman",
     "version": "0.1.0",
     "private": true,
+    "description": "Website which makes it quick and easy to add weather information to Strava activity descriptions",
+    "author": {
+        "name": "Cody Hoover",
+        "url": "https://www.github.com/hoovercj",
+        "email": "npm@codyhoover.com"
+    },
     "dependencies": {
         "@types/prop-types": "^15.5.3",
         "es6-promise": "^4.2.4",
@@ -9,9 +16,12 @@
         "portable-fetch": "^3.0.0",
         "react": "^16.4.1",
         "react-dom": "^16.4.1",
-        "react-scripts-ts": "2.16.0"
+        "react-scripts-ts": "2.16.0",
+        "gh-pages": "1.2.0"
     },
     "scripts": {
+        "predeploy": "npm run build",
+        "deploy": "gh-pages -d build",
         "start": "react-scripts-ts start",
         "build": "react-scripts-ts build",
         "test": "react-scripts-ts test --env=jsdom",

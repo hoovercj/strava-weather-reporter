@@ -3,14 +3,17 @@ export interface ICancelablePromise {
     cancel: () => void;
 }
 
-export const makeCancelable = (promise: Promise<any>): ICancelablePromise => {
+// Defined by @istarkov here (as of 7.15.2018):
+// https://github.com/facebook/react/issues/5465#issuecomment-157888325
+export const makeCancelable = (promise: Promise<any>) => {
     let hasCanceled_ = false;
-    const promise_ = promise;
 
     const wrappedPromise = new Promise((resolve, reject) => {
-        promise_.then(
-            val => hasCanceled_ ? reject({ isCanceled: true }) : resolve(val),
-            error => hasCanceled_ ? reject({ isCanceled: true }) : reject(error)
+        promise.then((val) =>
+            hasCanceled_ ? reject({ isCanceled: true }) : resolve(val)
+        );
+        promise.catch((error) =>
+            hasCanceled_ ? reject({ isCanceled: true }) : reject(error)
         );
     });
 
