@@ -29,6 +29,7 @@ export interface IStrava {
     redirectToStravaAuthorizationPage(): void;
     cachedUserInformation(): IUserInfo | undefined;
     clearCachedInformation(): void;
+    wakeup(): Promise<any>;
 }
 
 export interface IStravaAuthenticationResponse {
@@ -84,6 +85,15 @@ export class Strava implements IStrava {
         this.storage.clear();
     }
 
+    public wakeup = async (): Promise<any> => {
+        const wakeupUrl = `${this.config.backendUrl}/wakeup`;
+        const params = {
+            code: this.config.backendCode,
+        };
+        const url = this.getUrlWithParams(wakeupUrl, params);
+        return fetch(url);
+    }
+
     public exchangeCodeForUserInformation = async (stravaCode: string): Promise<IUserInfo> => {
         const authUrl = `${this.config.backendUrl}/auth`;
         const params = {
@@ -93,7 +103,9 @@ export class Strava implements IStrava {
         const url = this.getUrlWithParams(authUrl, params);
 
         return fetch(url, { method: 'POST' })
-            .then(response => response.json())
+            .then(response => {
+                return response.json();
+            } )
             .then((stravaResponse: IStravaAuthenticationResponse) => {
                 this.setCachedValue(this.STRAVA_AUTH_INFO_STORAGE_KEY, stravaResponse);
                 return stravaResponse.athlete;
@@ -127,7 +139,7 @@ export class Strava implements IStrava {
         const stravaBaseUrl = 'https://www.strava.com/oauth/authorize';
         const params = {
             client_id: this.config.clientId,
-            redirect_uri: this.config.stravaCodeRedirectUri,
+            redirect_uri: encodeURI(this.config.stravaCodeRedirectUri),
             response_type: 'code',
             scope: 'write',
         }

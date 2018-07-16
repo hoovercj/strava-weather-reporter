@@ -68,7 +68,8 @@ class App extends React.Component<IAppProps, IAppState> {
             this.props.strava.exchangeCodeForUserInformation(code)
                 .then(this.handleUserInformation)
                 .catch(this.handleError);
-            return;
+        } else {
+            this.props.strava.wakeup().catch();
         }
     }
 
@@ -147,14 +148,12 @@ class App extends React.Component<IAppProps, IAppState> {
 
     private handleError = (error: any) => {
         this.setState({
-            ...this.state,
             error,
         });
     }
 
     private handleUserInformation = (info: IUserInfo): void => {
         this.setState({
-            ...this.state,
             userInfo: info
         });
         clearQueryString();
