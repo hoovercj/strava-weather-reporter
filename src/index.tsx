@@ -5,7 +5,7 @@ import * as ReactDOM from 'react-dom';
 
 import App from 'src/App';
 import { ICopyrightInfo } from 'src/models/copyright-info';
-import registerServiceWorker from 'src/registerServiceWorker';
+// import registerServiceWorker from 'src/registerServiceWorker';
 import { Storage } from 'src/services/storage';
 import {
     IStravaConfiguration,
@@ -40,4 +40,4 @@ ReactDOM.render(
     />,
     document.getElementById('root') as HTMLElement
 );
-registerServiceWorker();
+// registerServiceWorker();
