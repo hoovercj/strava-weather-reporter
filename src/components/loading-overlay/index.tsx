@@ -13,15 +13,17 @@ export interface ILoadingOverlayProps {
 export class LoadingOverlay extends React.Component<ILoadingOverlayProps> {
     public render() {
         return (
-            <Overlay
-                isDarkThemed={true}
-                onClick={this.props.onClick}
-                className={'loading-overlay_overlay'}
-            >
-                <Spinner
-                    ariaLabel={'Loading'}
-                />
-            </Overlay>
+            <div className={'loading-overlay_container'}>
+                <Overlay
+                    isDarkThemed={true}
+                    onClick={this.props.onClick}
+                    className={'loading-overlay_overlay'}
+                >
+                    <Spinner
+                        ariaLabel={'Loading'}
+                    />
+                </Overlay>
+            </div>
         )
     }
 }

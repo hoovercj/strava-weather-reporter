@@ -1,4 +1,4 @@
-.loading-overlay_overlay {
+.loading-overlay_container .loading-overlay_overlay {
     height: 100%;
     position: fixed;
     top: 0;
