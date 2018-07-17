@@ -11,6 +11,10 @@
     align-items: center;
 }
 
+.page-footer_column_wrappable {
+    flex-wrap: wrap;
+}
+
 .page-footer_image-button_powered-by {
     width: 100px;
 }

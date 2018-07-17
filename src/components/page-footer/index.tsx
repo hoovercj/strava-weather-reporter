@@ -16,7 +16,7 @@ export class PageFooter extends React.Component<IPageFooterProps> {
     public render() {
         return (
             <div className={'page-footer_container'}>
-                <div className={'page-footer_column'}>
+                <div className={'page-footer_column page-footer_column_wrappable'}>
                     {'© 2018\u00a0'}<Link href={this.props.copyrightInfo.url}>{this.props.copyrightInfo.name}</Link>
                 </div>
                 <div className={'page-footer_column'}>
