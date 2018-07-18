@@ -1,0 +1,46 @@
+.landing_header,
+.landing_body {
+    display: flex;
+    flex-direction: column;
+    width: calc(100% - 60px);
+    padding: 30px;
+    align-items: center;
+    color: white;
+    text-align: center;
+}
+
+.landing_header_title {
+    text-transform: uppercase;
+    padding: 0 0 15px 0;
+    margin: 0px;
+}
+
+.landing_header_sub {
+    font-weight: 300;
+    font-size: 1.2em;
+}
+
+.landing_body {
+    background: linear-gradient(
+        rgba(0, 0, 0, 0.35), 
+        rgba(0, 0, 0, 0.35)
+      ), url("hero.jpg");
+    background-size:     cover;
+    background-repeat:   no-repeat;
+    background-position: center center;
+}
+
+.landing_body_text {
+    margin: 15px;
+}
+
+.landing_body_text-big {
+    font-weight: bold;
+    font-size: 1.75em;
+}
+
+.landing_body_text-small {
+    font-size: 1.33em;
+    font-weight: 300;
+    margin-bottom: 30px;
+}
