@@ -2,6 +2,11 @@
     color: #fc4c02;
 }
 
+.background-color_theme-primary {
+    background-color: #fc4c02;
+    color: white;
+}
+
 .color_neutral-primary {
     color: #2d2d32;
 }

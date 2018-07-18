@@ -1,7 +1,6 @@
 import {
     getTheme,
     ITheme,
-    Link,
     loadTheme,
 } from 'office-ui-fabric-react';
 // This is necessary for icons to appear in dialogs
@@ -9,25 +8,18 @@ import {
 import { initializeIcons } from 'office-ui-fabric-react/lib/Icons';
 import * as React from 'react';
 
-import connectWithStravaImage from 'src/assets/connect_with_strava_orange.svg';
-import { ActivitiesList } from 'src/components/activities-list';
-import { ImageButton } from 'src/components/image-button'
-import { PageFooter } from 'src/components/page-footer';
-import { ICopyrightInfo } from 'src/models/copyright-info';
-import { IStrava, IUserInfo } from 'src/services/strava/strava';
 
 import 'src/styles/colors.css';
 import 'src/styles/fonts.css';
-import './App.css';
 
-import {
-    PageHeader,
-} from './components/page-header';
-
+import { ICopyrightInfo } from 'src/models/copyright-info';
+import { ActivitiesPage } from 'src/pages/activities';
+import { LandingPage } from 'src/pages/landing';
+import { IStrava, IUserInfo } from 'src/services/strava/strava';
 import {
     clearQueryString,
     getQueryStringValue,
-} from './utils/query-string';
+} from 'src/utils/query-string';
 
 interface IAppProps {
     copyrightInfo: ICopyrightInfo;
@@ -74,68 +66,31 @@ class App extends React.Component<IAppProps, IAppState> {
     }
 
     public render() {
-        return (
-            <div className="app_container">
-                {this.renderHeader()}
-                {this.renderContent()}
-                {this.renderFooter()}
-            </div>
-        );
+        return this.state.userInfo ?
+            this.renderActivitiesPage() :
+            this.renderLandingPage();
     }
 
-    private renderHeader = () => {
+    private renderLandingPage = () => {
         return (
-            <div className="app_header">
-                <PageHeader pageTitle={this.props.name}>
-                    {this.getHeaderMenuItems()}
-                </PageHeader>
-            </div>
-        );
+            <LandingPage
+                copyrightInfo={this.props.copyrightInfo}
+                strava={this.props.strava}
+                name={this.props.name}
+            />
+        )
     }
 
-    private renderContent = () => {
+    private renderActivitiesPage = () => {
         return (
-            <div className="app_content">
-                { this.state.userInfo &&
-                    <ActivitiesList
-                        itemsPerPage={this.props.activitiesPerPage}
-                        strava={this.props.strava}
-                    />
-                }
-            </div>
-        );
-    }
-
-    private renderFooter = () => {
-        return (
-            <div className="app_footer">
-                <PageFooter copyrightInfo={this.props.copyrightInfo}/>
-            </div>
-        );
-    }
-
-    private getHeaderMenuItems = (): JSX.Element[] => {
-        if (this.state.userInfo) {
-            return [(
-                <Link
-                    className={'color_neutral-primary-alt'}
-                    key={'page-sign-out'}
-                    onClick={this.signOut}
-                >
-                    {`Log Out`}
-                </Link>
-            )]
-        } else {
-            return [
-                <ImageButton
-                    className={'app_header_sign-in-link'}
-                    key={'page-sign-in'}
-                    aria-label={'Connect with Strava'}
-                    onClick={this.props.strava.redirectToStravaAuthorizationPage}
-                    src={connectWithStravaImage}
-                />
-            ]
-        }
+            <ActivitiesPage
+                activitiesPerPage={this.props.activitiesPerPage}
+                copyrightInfo={this.props.copyrightInfo}
+                onSignOut={this.signOut}
+                strava={this.props.strava}
+                name={this.props.name}
+            />
+        )
     }
 
     private signOut = () => {
