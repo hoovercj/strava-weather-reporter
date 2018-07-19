@@ -5,13 +5,12 @@ import 'src/styles/fonts.css';
 import './index.css';
 
 import { PageFooter } from 'src/components/page-footer';
-import { ICopyrightInfo } from 'src/models/copyright-info';
+import { IAppInfo } from 'src/models/copyright-info';
 import { IStrava } from 'src/services/strava/strava';
 
 export interface IPageProps {
-    copyrightInfo: ICopyrightInfo;
+    applicationInfo: IAppInfo;
     strava: IStrava;
-    name: string;
 }
 
 export abstract class Page<T extends IPageProps> extends React.Component<T> {
@@ -31,7 +30,7 @@ export abstract class Page<T extends IPageProps> extends React.Component<T> {
 
     protected renderFooter(): JSX.Element | JSX.Element[] {
         return (
-            <PageFooter copyrightInfo={this.props.copyrightInfo}/>
+            <PageFooter applicationInfo={this.props.applicationInfo}/>
         );
     }
 

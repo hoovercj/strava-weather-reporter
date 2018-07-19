@@ -5,6 +5,7 @@
     width: calc(100% - 60px);
     padding: 30px;
     align-items: center;
+    justify-content: center;
     color: white;
     text-align: center;
 }

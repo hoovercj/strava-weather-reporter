@@ -14,7 +14,7 @@ export class ActivitiesPage extends Page<IActivitiesPageProps> {
 
     protected renderHeader() {
         return (
-            <PageHeader pageTitle={this.props.name}>
+            <PageHeader pageTitle={this.props.applicationInfo.applicationName}>
                 <Link
                     className={'color_neutral-primary-alt'}
                     key={'page-sign-out'}

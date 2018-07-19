@@ -1,4 +1,7 @@
-export interface ICopyrightInfo {
-    url: string;
-    name: string;
+export interface IAppInfo {
+    copyrightUrl: string;
+    copyrightName: string;
+    contactEmail: string;
+    applicationName: string;
+    githubUrl: string;
 }

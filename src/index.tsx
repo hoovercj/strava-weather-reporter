@@ -4,7 +4,7 @@ import * as React from 'react';
 import * as ReactDOM from 'react-dom';
 
 import App from 'src/App';
-import { ICopyrightInfo } from 'src/models/copyright-info';
+import { IAppInfo } from 'src/models/copyright-info';
 import { Storage } from 'src/services/storage';
 import {
     IStravaConfiguration,
@@ -23,9 +23,12 @@ const stravaConfig: IStravaConfiguration = {
 }
 const strava = new Strava(stravaConfig, storage);
 const activitiesPerPage = process.env.REACT_APP_ACTIVITIES_PER_PAGE;
-const copyrightInfo: ICopyrightInfo = {
-    name: process.env.REACT_APP_COPYRIGHT_NAME || '',
-    url: process.env.REACT_APP_COPYRIGHT_URL || '',
+const applicationInfo: IAppInfo = {
+    applicationName: process.env.REACT_APP_APPLICATION_NAME || '',
+    contactEmail: process.env.REACT_APP_CONTACT_EMAIL || '',
+    copyrightName: process.env.REACT_APP_COPYRIGHT_NAME || '',
+    copyrightUrl: process.env.REACT_APP_COPYRIGHT_URL || '',
+    githubUrl: process.env.REACT_APP_GITHUB_URL || '',
 }
 
 // TODO: Convert promises to async/await
@@ -34,8 +37,7 @@ const copyrightInfo: ICopyrightInfo = {
 ReactDOM.render(
     <App
         strava={strava}
-        name={process.env.REACT_APP_APPLICATION_NAME || ''}
-        copyrightInfo={copyrightInfo}
+        applicationInfo={applicationInfo}
         activitiesPerPage={Number(activitiesPerPage)}
     />,
     document.getElementById('root') as HTMLElement

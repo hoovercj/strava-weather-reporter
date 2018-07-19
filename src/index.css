@@ -4,6 +4,11 @@ body {
   font-family: -apple-system, system-ui, BlinkMacSystemFont, Roboto, "Segoe UI", "Helvetica Neue", Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";  background-color: #f5f5fa;
 }
 
+p {
+  margin: 0;
+  padding: 0;
+}
+
 html,
 body,
 #root {
