@@ -12,7 +12,7 @@ import * as React from 'react';
 import 'src/styles/colors.css';
 import 'src/styles/fonts.css';
 
-import { ICopyrightInfo } from 'src/models/copyright-info';
+import { IAppInfo } from 'src/models/copyright-info';
 import { ActivitiesPage } from 'src/pages/activities';
 import { LandingPage } from 'src/pages/landing';
 import { IStrava, IUserInfo } from 'src/services/strava/strava';
@@ -22,8 +22,7 @@ import {
 } from 'src/utils/query-string';
 
 interface IAppProps {
-    copyrightInfo: ICopyrightInfo;
-    name: string,
+    applicationInfo: IAppInfo;
     strava: IStrava,
     activitiesPerPage: number,
 }
@@ -74,9 +73,8 @@ class App extends React.Component<IAppProps, IAppState> {
     private renderLandingPage = () => {
         return (
             <LandingPage
-                copyrightInfo={this.props.copyrightInfo}
+                applicationInfo={this.props.applicationInfo}
                 strava={this.props.strava}
-                name={this.props.name}
             />
         )
     }
@@ -85,10 +83,9 @@ class App extends React.Component<IAppProps, IAppState> {
         return (
             <ActivitiesPage
                 activitiesPerPage={this.props.activitiesPerPage}
-                copyrightInfo={this.props.copyrightInfo}
+                applicationInfo={this.props.applicationInfo}
                 onSignOut={this.signOut}
                 strava={this.props.strava}
-                name={this.props.name}
             />
         )
     }
