@@ -1,10 +1,12 @@
-import { Dialog, Link } from 'office-ui-fabric-react';
+import { Dialog, getTheme, Link } from 'office-ui-fabric-react';
+import { getStyles } from 'office-ui-fabric-react/lib/components/Dialog/Dialog.styles';
 import * as React from 'react';
 
 import poweredByDarkSky from 'src/assets/powered_by_dark_sky_light.png';
 import poweredByStrava from 'src/assets/powered_by_strava_stacked_light.svg';
 import { ImageButton } from 'src/components/image-button';
 import { IAppInfo } from 'src/models/copyright-info'
+import { PrivacyPolicyPage } from 'src/pages/privacy-policy';
 
 import './index.css';
 
@@ -12,8 +14,20 @@ export interface IPageFooterProps {
     applicationInfo: IAppInfo;
 }
 
-export class PageFooter extends React.Component<IPageFooterProps> {
+export interface IPageFooterState {
+    showPrivacyPolicy: boolean;
+}
+
+export class PageFooter extends React.Component<IPageFooterProps, IPageFooterState> {
+    constructor(props: IPageFooterProps) {
+        super(props);
+        this.state = {
+            showPrivacyPolicy: false,
+        };
+    }
+    
     public render() {
+
         const {
             applicationName,
             contactEmail,
@@ -29,8 +43,8 @@ export class PageFooter extends React.Component<IPageFooterProps> {
                 <div className={'page-footer_column page-footer_column_center'}>
                     <Link className={'page-footer_link'} href={`mailto:${contactEmail}?subject=About ${applicationName}`}>Contact</Link>
                     <span className={'page-footer_separator'}>|</span>
-                    {/* <Link className={'page-footer_link'} onClick={this.renderPrivacyPolicy}>Privacy Policy</Link>
-                    <span className={'page-footer_separator'}>|</span> */}
+                    <Link className={'page-footer_link'} onClick={this.onPrivacyPolicyLinkInvoked}>Privacy Policy</Link>
+                    <span className={'page-footer_separator'}>|</span>
                     <Link className={'page-footer_link'} href={githubUrl}>Github</Link>
                 </div>
                 <div className={'page-footer_column page-footer_column_right'}>
@@ -51,15 +65,31 @@ export class PageFooter extends React.Component<IPageFooterProps> {
                         target="_blank"
                     />
                 </div>
+                {this.renderPrivacyPolicy()}
             </div>
         )
     }
 
-    public renderPrivacyPolicy = () => {
-        return <Dialog
-            dialogContentProps={{
-                title: 'Privacy Policy',
-            }}
-        />
+    private onPrivacyPolicyLinkInvoked = () => {
+        this.setState({showPrivacyPolicy: true});
+    }
+    
+    private onPrivacyPolicyDialogDismissed = () => {
+        this.setState({showPrivacyPolicy: false});
+    }
+
+    private renderPrivacyPolicy = () => {
+        return (
+            <Dialog
+                hidden={!this.state.showPrivacyPolicy}
+                onDismiss={this.onPrivacyPolicyDialogDismissed}
+                styles={getStyles({
+                    dialogDefaultMaxWidth: '80%',
+                    theme: getTheme(),
+                })}
+            >
+                <PrivacyPolicyPage />
+            </Dialog>
+        );
     }
 }

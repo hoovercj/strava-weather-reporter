@@ -12,7 +12,7 @@
     "dependencies": {
         "@types/prop-types": "^15.5.3",
         "es6-promise": "^4.2.4",
-        "office-ui-fabric-react": "6.26.0",
+        "office-ui-fabric-react": "6.38.1",
         "portable-fetch": "^3.0.0",
         "react": "^16.4.1",
         "react-dom": "^16.4.1",
