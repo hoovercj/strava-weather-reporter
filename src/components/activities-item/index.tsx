@@ -7,7 +7,8 @@ import { ISummaryActivity } from 'src/services/strava/strava';
 import {
     distanceInMetersToMileString,
     durationInSecondsToString,
-    metersPerSecondToMinutesPerMileString
+    metersPerSecondToMinutesPerMileString,
+    dateToDateTimeString
 } from 'src/utils/string-utils';
 import './index.css';
 
@@ -22,7 +23,7 @@ export class ActivitiesItem extends React.Component<IActivitiesItemProps> {
     public render() {
         const activity = this.props.activity;
 
-        const date = activity.start_date_local && new Date(activity.start_date_local).toDateString();
+        const date = activity.start_date_local && dateToDateTimeString(new Date(activity.start_date_local));
         const name = this.props.activity.name;
 
         const stats: IActivityStatistic[] = [{

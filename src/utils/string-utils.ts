@@ -1,3 +1,5 @@
+import { format } from 'date-fns';
+
 export const getRoundedString = (value: number | string, decimals: number): string => {
     return Number(Math.round(Number(value + 'e' + decimals)) + 'e-' + decimals).toFixed(decimals);
 }
@@ -6,6 +8,10 @@ export const leftPad = (num: number, size: number): string => {
     let s = String(num);
     while (s.length < size) { s = "0" + s };
     return s;
+}
+
+export const dateToDateTimeString = (date: Date): string => {
+    return format(date, 'MMMM Do[,] YYYY [at] h[:]mm a')
 }
 
 export const distanceInMetersToMileString = (meters: number): string => {
