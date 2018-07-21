@@ -216,12 +216,12 @@ export class ActivitiesList extends React.Component<IActivitiesListProps, IActiv
 
         return (
             <LoadingOverlay
-                onClick={this.onLoadingActivityOverlayClicked}
+                onClick={this.onCancelLoadingActivity}
             />
         )
     }
 
-    private onLoadingActivityOverlayClicked = () => {
+    private onCancelLoadingActivity = () => {
         console.log('onLoadingActivityOverlayClicked');
         if (this.state.loadingActivity) {
             console.log('onLoadingActivityOverlayClicked -- setting state');

@@ -12,6 +12,7 @@ import * as React from 'react';
 import 'src/styles/colors.css';
 import 'src/styles/fonts.css';
 
+import { LoadingOverlay } from 'src/components/loading-overlay';
 import { IAppInfo } from 'src/models/copyright-info';
 import { ActivitiesPage } from 'src/pages/activities';
 import { LandingPage } from 'src/pages/landing';
@@ -28,6 +29,7 @@ interface IAppProps {
 }
 
 interface IAppState {
+    authenticating?: boolean;
     userInfo?: IUserInfo;
     error?: any;
 }
@@ -38,6 +40,8 @@ class App extends React.Component<IAppProps, IAppState> {
         super(props);
 
         this.state = {
+            authenticating: false,
+            error: undefined,
             userInfo: this.props.strava.cachedUserInformation(),
         };
     }
@@ -56,18 +60,40 @@ class App extends React.Component<IAppProps, IAppState> {
         // If we have a code in the query parameters, exchange it for user info
         const code = getQueryStringValue('code');
         if (code) {
+            this.setState({authenticating: true});
             this.props.strava.exchangeCodeForUserInformation(code)
                 .then(this.handleUserInformation)
-                .catch(this.handleError);
+                .catch(this.handleAuthError);
         } else {
             this.props.strava.wakeup().catch();
         }
     }
 
     public render() {
-        return this.state.userInfo ?
+        const authPage = this.renderAuthenticatingPage();
+        const mainContent = this.state.userInfo ?
             this.renderActivitiesPage() :
             this.renderLandingPage();
+
+            return [authPage, mainContent];
+    }
+
+    private renderAuthenticatingPage = () => {
+        // tslint:disable-next-line
+        debugger
+        if (this.state.userInfo || !this.state.authenticating) {
+            return;
+        }
+        
+        return (
+            <LoadingOverlay 
+                onClick={this.cancelAuthentication}
+            />
+        )
+    }
+
+    private cancelAuthentication = () => {
+        this.setState({authenticating: false});
     }
 
     private renderLandingPage = () => {
@@ -98,15 +124,17 @@ class App extends React.Component<IAppProps, IAppState> {
         });
     }
 
-    private handleError = (error: any) => {
+    private handleAuthError = (error: any) => {
         this.setState({
+            authenticating: false,
             error,
         });
     }
 
     private handleUserInformation = (info: IUserInfo): void => {
         this.setState({
-            userInfo: info
+            authenticating: false,
+            userInfo: info,
         });
         clearQueryString();
     }
@@ -128,7 +156,7 @@ class App extends React.Component<IAppProps, IAppState> {
             },
             semanticColors: currentTheme.semanticColors,
         };
-    }
+    };
 }
 
 export default App;
