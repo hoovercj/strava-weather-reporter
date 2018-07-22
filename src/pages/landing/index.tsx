@@ -1,6 +1,5 @@
 import * as React from 'react';
 
-import 'src/styles/colors.css';
 import './index.css';
 
 import connectWithStravaImage from 'src/assets/connect_with_strava_orange.svg';

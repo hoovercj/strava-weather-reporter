@@ -1,7 +1,10 @@
 import {
+    Dialog,
+    DialogFooter,
     getTheme,
     ITheme,
     loadTheme,
+    PrimaryButton,
 } from 'office-ui-fabric-react';
 // This is necessary for icons to appear in dialogs
 // TODO: Is it possible to only initialize some icons?
@@ -31,7 +34,7 @@ interface IAppProps {
 interface IAppState {
     authenticating?: boolean;
     userInfo?: IUserInfo;
-    error?: any;
+    error?: string;
 }
 
 class App extends React.Component<IAppProps, IAppState> {
@@ -70,23 +73,47 @@ class App extends React.Component<IAppProps, IAppState> {
     }
 
     public render() {
+        const errorDialog = this.renderErrorDialog();
         const authPage = this.renderAuthenticatingPage();
         const mainContent = this.state.userInfo ?
             this.renderActivitiesPage() :
             this.renderLandingPage();
 
-            return [authPage, mainContent];
+            return [
+                errorDialog,
+                authPage,
+                mainContent,
+            ];
+    }
+
+    private renderErrorDialog = () => {
+        const onDismiss = () => { this.setState({error: undefined}); }
+
+        return (
+            <Dialog
+                key='error-dialog'
+                hidden={!this.state.error}
+                dialogContentProps={{
+                    onDismiss,
+                    subText: this.state.error,
+                    title: 'Something went wrong',
+                }}
+            >
+                <DialogFooter>
+                    <PrimaryButton onClick={onDismiss} text='Ok' />
+                </DialogFooter>
+            </Dialog>
+        );
     }
 
     private renderAuthenticatingPage = () => {
-        // tslint:disable-next-line
-        debugger
         if (this.state.userInfo || !this.state.authenticating) {
             return;
         }
         
         return (
-            <LoadingOverlay 
+            <LoadingOverlay
+                key='authenticating'
                 onClick={this.cancelAuthentication}
             />
         )
@@ -99,6 +126,7 @@ class App extends React.Component<IAppProps, IAppState> {
     private renderLandingPage = () => {
         return (
             <LandingPage
+                key='landing'
                 applicationInfo={this.props.applicationInfo}
                 strava={this.props.strava}
             />
@@ -108,6 +136,7 @@ class App extends React.Component<IAppProps, IAppState> {
     private renderActivitiesPage = () => {
         return (
             <ActivitiesPage
+                key='activities'
                 activitiesPerPage={this.props.activitiesPerPage}
                 applicationInfo={this.props.applicationInfo}
                 onSignOut={this.signOut}
@@ -125,18 +154,19 @@ class App extends React.Component<IAppProps, IAppState> {
     }
 
     private handleAuthError = (error: any) => {
+        clearQueryString();
         this.setState({
             authenticating: false,
-            error,
+            error: 'We were unable to sign you in at this time.',
         });
     }
 
     private handleUserInformation = (info: IUserInfo): void => {
+        clearQueryString();
         this.setState({
             authenticating: false,
             userInfo: info,
         });
-        clearQueryString();
     }
 
     private getCustomTheme = (): ITheme => {

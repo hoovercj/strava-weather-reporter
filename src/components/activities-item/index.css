@@ -23,7 +23,10 @@
     line-height: 1.333;
     letter-spacing: -0.02rem;
     margin-bottom: 6px;
-    color: currentColor; /* This is a link, but avoid changing the color unless hovered or focused */
+    /* This is a link, but avoid changing the color unless hovered or focused */
+    color: currentColor;
+    /* Office fabric sets a position on this which makes the text appear ON TOP of the sticky message bar */
+    position: inherit;
 }
 
 .activity-item_map-wrapper {

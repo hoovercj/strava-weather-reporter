@@ -1,5 +1,7 @@
 import {
     List,
+    MessageBar,
+    MessageBarType,
     Spinner,
 } from 'office-ui-fabric-react';
 import * as React from 'react';
@@ -38,6 +40,7 @@ export interface IActivitiesListState {
     activities: ISummaryActivity[];
     nextPageToLoad: number;
     loadingState: LoadingState;
+    error?: string;
 }
 
 export class ActivitiesList extends React.Component<IActivitiesListProps, IActivitiesListState> {
@@ -59,11 +62,28 @@ export class ActivitiesList extends React.Component<IActivitiesListProps, IActiv
     public render() {
         return (
             <div>
+                {this.renderPageError()}
                 {this.renderActivitiesList()}
                 {this.renderLoadingActivityOverlay()}
                 {this.renderActivityDialog()}
             </div>
         );
+    }
+
+    private renderPageError = () => {
+        const onDismiss = () => {
+            this.setState({ error: undefined });
+        }
+
+        return !this.state.error ? null : (
+            <MessageBar
+                messageBarType={MessageBarType.error}
+                className={'activities-list_message-bar'}
+                onDismiss={onDismiss}
+            >
+                {this.state.error}
+            </MessageBar>
+        )
     }
 
     private renderActivitiesList = () => {
@@ -89,13 +109,10 @@ export class ActivitiesList extends React.Component<IActivitiesListProps, IActiv
     }
 
     private onDialogDismiss = () => {
-        console.log('onDialogDismiss');
         return Promise.resolve(this.setState({ activeActivity: undefined }));
     }
 
     private onDialogApprove = async (activity: ISummaryActivityWithDescription) => {
-        console.log('onDialogApprove');
-
         // No activity to update. Easy!
         if (!activity || !activity.id) {
             return;
@@ -110,22 +127,20 @@ export class ActivitiesList extends React.Component<IActivitiesListProps, IActiv
         try {
             await this.props.strava.updateDescriptionForActivity(String(activity.id));
         } catch {
-            // TODO: logging, show error
+            // TODO: logging
+            this.setState({ error: 'Unable to update the activity.'})
         }
         return Promise.resolve(this.setState({ activeActivity: undefined }));
     }
 
     private onActivityClicked = (activity: ISummaryActivity) => {
         // Don't try to load multiple activities
-        console.log('onActivityClicked');
         if (this.isLoadingActivityDescription()) {
-            console.log('onActivityClicked -- already loading activity');
             return;
         }
 
         // Can't load an activity if it doesn't have the right information
         if (!activity.id) {
-            console.log('onActivityClicked -- no activity id');
             return;
         }
 
@@ -133,18 +148,12 @@ export class ActivitiesList extends React.Component<IActivitiesListProps, IActiv
     }
 
     private fetchActivityDescription = async (activity: SummaryActivity) => {
-        console.log('fetchActivityDescription');
-
         try {
             const description = await this.props.strava.getDescriptionForActivity(String(activity.id));
-
-            console.log('fetchActivityDescription -- description fetched:');
-            console.log(description);
 
             // Somehow the loading activity is not the one that this function
             // was asked to load, so abandon this request
             if (this.state.loadingActivity !== activity) {
-                console.log('fetchActivityDescription -- loadingActivity is not this activity')
                 return;
             }
 
@@ -158,8 +167,8 @@ export class ActivitiesList extends React.Component<IActivitiesListProps, IActiv
             });
         } catch {
             // TODO: logging
-
             this.setState({
+                error: 'Unable to load activity information.',
                 loadingActivity: undefined,
             });
         }
@@ -222,9 +231,7 @@ export class ActivitiesList extends React.Component<IActivitiesListProps, IActiv
     }
 
     private onCancelLoadingActivity = () => {
-        console.log('onLoadingActivityOverlayClicked');
         if (this.state.loadingActivity) {
-            console.log('onLoadingActivityOverlayClicked -- setting state');
             this.setState({ loadingActivity: undefined });
         }
     }

@@ -21,7 +21,7 @@ export const distanceInMetersToMileString = (meters: number): string => {
 
 export const metersPerSecondToMinutesPerMileString = (metersPerSecond: number): string => {
     const minutesPerMileDecimal = metersPerSecond * 2.68224;
-    const minutes = Math.trunc(minutesPerMileDecimal);
+    const minutes = Math.floor(minutesPerMileDecimal);
     const seconds = leftPad(Math.round((minutesPerMileDecimal % 1) * 60), 2);
 
     return `${minutes}:${seconds} / mi`;
@@ -33,13 +33,13 @@ export const durationInSecondsToString = (duration: number): string => {
 
     const timeParts = [];
 
-    const hours = Math.trunc(duration / secondsPerHour)
+    const hours = Math.floor(duration / secondsPerHour)
     duration -= hours * secondsPerHour;
     if (hours) {
         timeParts.push(hours);
     }
 
-    const minutes = Math.trunc(duration / secondsPerMinute);
+    const minutes = Math.floor(duration / secondsPerMinute);
     duration -= minutes * secondsPerMinute;
     timeParts.push(leftPad(minutes, 2));
 
