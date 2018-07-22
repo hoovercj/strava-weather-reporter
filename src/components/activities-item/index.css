@@ -25,8 +25,6 @@
     margin-bottom: 6px;
     /* This is a link, but avoid changing the color unless hovered or focused */
     color: currentColor;
-    /* Office fabric sets a position on this which makes the text appear ON TOP of the sticky message bar */
-    position: inherit;
 }
 
 .activity-item_map-wrapper {

@@ -43,7 +43,19 @@ export class ActivitiesItem extends React.Component<IActivitiesItemProps> {
             <Card>
                 <div className={'activity-item_container'}>
                     <div className={'activity-item_header-wrapper'}>
-                        <Link onClick={this.onInvoked} className={'activity-item_name'}>{name}</Link>
+                        <Link
+                            onClick={this.onInvoked}
+                            className={'activity-item_name'}
+                            styles={{
+                                root: {
+                                    // Office fabric sets this to 'relative' which
+                                    // makes the text appear above the sticky error bar
+                                    position: 'inherit',
+                                }
+                            }}
+                        >
+                            {name}
+                        </Link>
                         <div className={'activity-item_date'}>{date}</div>
                         <StatisticGroup statistics={stats} />
                     </div>
