@@ -41,6 +41,20 @@
     width: 150px;
 }
 
+.activity-item_name .activity-item_name_icon {
+    font-size: 12px;
+    padding-left: 10px;
+}
+
+.activity-item_name_icon_add {
+    visibility: hidden;
+}
+
+.activity-item_name:focus .activity-item_name_icon_add,
+.activity-item_name:hover .activity-item_name_icon_add {
+    visibility: visible;
+}
+
 @media only screen and (max-width: 600px) {
     .activity-item_container {
         flex-direction: column;

@@ -1,5 +1,5 @@
 // tslint:disable
-import { Link } from 'office-ui-fabric-react';
+import { Link, Icon } from 'office-ui-fabric-react';
 import * as React from 'react';
 import { IActivityStatistic } from 'src/components/activity-statistic';
 import { StatisticGroup } from 'src/components/statistic-group';
@@ -16,6 +16,7 @@ import { Card } from 'src/components/card';
 
 export interface IActivitiesItemProps {
     activity: ISummaryActivity;
+    processed?: boolean;
     onInvoked?: (activity: ISummaryActivity) => void;
 }
 
@@ -47,7 +48,9 @@ export class ActivitiesItem extends React.Component<IActivitiesItemProps> {
                             onClick={this.onInvoked}
                             className={'activity-item_name'}
                         >
-                            {name}
+                            {name}{this.props.processed ?
+                                 <Icon ariaLabel='Updated' iconName='CompletedSolid' className='activity-item_name_icon color_theme-primary' /> :
+                                 <Icon ariaLabel='Update description' iconName='CommentAdd' className='activity-item_name_icon activity-item_name_icon_add'/>}
                         </Link>
                         <div className={'activity-item_date'}>{date}</div>
                         <StatisticGroup statistics={stats} />

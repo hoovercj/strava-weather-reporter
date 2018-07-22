@@ -23,13 +23,14 @@ export interface IStravaConfiguration {
 
 export interface IStrava {
     activitiesApi: ActivitiesApi;
+    cachedProcessedActivities(): string[];
+    processedActivities(): Promise<string[]>;
     getDescriptionForActivity(id: string): Promise<string>;
     updateDescriptionForActivity(id: string): Promise<string>;
     exchangeCodeForUserInformation(code: string): Promise<IUserInfo>;
     redirectToStravaAuthorizationPage(): void;
     cachedUserInformation(): IUserInfo | undefined;
     clearCachedInformation(): void;
-    wakeup(): Promise<any>;
 }
 
 export interface IStravaAuthenticationResponse {
@@ -65,6 +66,7 @@ export class Strava implements IStrava {
     private cache: { [key: string]: any } = {};
 
     private readonly STRAVA_AUTH_INFO_STORAGE_KEY = 'STRAVA_AUTH_INFO';
+    private readonly STRAVA_PROCESSED_ACTIVITIES_STORAGE_KEY = 'STRAVA_PROCESSED_ACTIVITIES';
 
     constructor(private config: IStravaConfiguration, private storage: IStorage) {
         const apiConfig: Configuration = { accessToken: this.getAuthToken };
@@ -80,18 +82,28 @@ export class Strava implements IStrava {
             && stravaResponse.athlete;
     }
 
+    public cachedProcessedActivities = (): string[] => {
+        return this.getCachedValue<string[]>(this.STRAVA_PROCESSED_ACTIVITIES_STORAGE_KEY);
+    }
+
     public clearCachedInformation = (): void => {
         this.cache = {};
         this.storage.clear();
     }
 
-    public wakeup = async (): Promise<any> => {
-        const wakeupUrl = `${this.config.backendUrl}/wakeup`;
+    public processedActivities = (): Promise<string[]> => {
+        const apiUrl = `${this.config.backendUrl}/processedactivities/${this.cachedUserInformation().id}`;
         const params = {
-            code: this.config.backendCode,
-        };
-        const url = this.getUrlWithParams(wakeupUrl, params);
-        return fetch(url);
+            token: this.getAuthToken(),
+        }
+        const url = this.getUrlWithParams(apiUrl, params);
+
+        return fetch(url)
+            .then(response => response.json())
+            .then((processedActivities: string[]) => {
+                this.setCachedValue(this.STRAVA_PROCESSED_ACTIVITIES_STORAGE_KEY, processedActivities);
+                return processedActivities;
+            });
     }
 
     public exchangeCodeForUserInformation = async (stravaCode: string): Promise<IUserInfo> => {
@@ -103,9 +115,7 @@ export class Strava implements IStrava {
         const url = this.getUrlWithParams(authUrl, params);
 
         return fetch(url, { method: 'POST' })
-            .then(response => {
-                return response.json();
-            } )
+            .then(response => response.json())
             .then((stravaResponse: IStravaAuthenticationResponse) => {
                 this.setCachedValue(this.STRAVA_AUTH_INFO_STORAGE_KEY, stravaResponse);
                 return stravaResponse.athlete;
@@ -121,10 +131,9 @@ export class Strava implements IStrava {
     }
 
     public descriptionForActivityCore = async (id: string, method: string): Promise<string> => {
-        const descriptionUrl = `${this.config.backendUrl}/getdescription`;
+        const descriptionUrl = `${this.config.backendUrl}/description/${id}`;
         const params = {
             code: this.config.backendCode,
-            id,
             token: this.getAuthToken(),
         }
         const url = this.getUrlWithParams(descriptionUrl, params);

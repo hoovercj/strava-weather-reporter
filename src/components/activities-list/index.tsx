@@ -40,6 +40,7 @@ export interface IActivitiesListState {
     activities: ISummaryActivity[];
     nextPageToLoad: number;
     loadingState: LoadingState;
+    processedActivities: string[];
     error?: string;
 }
 
@@ -52,11 +53,13 @@ export class ActivitiesList extends React.Component<IActivitiesListProps, IActiv
             activities: [],
             loadingState: LoadingState.Ready,
             nextPageToLoad: 1,
+            processedActivities: this.props.strava.cachedProcessedActivities() || [],
         };
     }
 
     public componentDidMount() {
         this.fetchNextActivities();
+        this.fetchProcessedActivities();
     }
 
     public render() {
@@ -132,12 +135,21 @@ export class ActivitiesList extends React.Component<IActivitiesListProps, IActiv
         }
 
         try {
-            await this.props.strava.updateDescriptionForActivity(String(activity.id));
+            const success = await this.props.strava.updateDescriptionForActivity(String(activity.id));
+            this.setState({
+                activeActivity: undefined,
+                processedActivities: !!success ?
+                    [...this.state.processedActivities, String(activity.id)] :
+                    this.state.processedActivities,
+            });
         } catch {
             // TODO: logging
-            this.setState({ error: 'Unable to update the activity.'})
+            this.setState({
+                activeActivity: undefined,
+                error: 'Unable to update the activity.',
+            });
+            return Promise.resolve();
         }
-        return Promise.resolve(this.setState({ activeActivity: undefined }));
     }
 
     private onActivityClicked = (activity: ISummaryActivity) => {
@@ -199,7 +211,8 @@ export class ActivitiesList extends React.Component<IActivitiesListProps, IActiv
     }
 
     private renderActivitiesItem = (item: ISummaryActivity) => {
-        return <ActivitiesItem activity={item} onInvoked={this.onActivityClicked} />
+        const processed = this.state.processedActivities.indexOf(String(item.id)) >= 0;
+        return <ActivitiesItem activity={item} onInvoked={this.onActivityClicked} processed={processed} />
     }
 
     private renderLoadingSpinner = () => {
@@ -268,6 +281,14 @@ export class ActivitiesList extends React.Component<IActivitiesListProps, IActiv
         this.setState({
             loadingState: LoadingState.Loading
         }, this.fetchActivitiesCore)
+    }
+
+    private fetchProcessedActivities = async (): Promise<void> => {
+        const processedActivities = await this.props.strava.processedActivities();
+        
+        this.setState({
+            processedActivities,
+        });
     }
 
     private fetchActivitiesCore = () => {
