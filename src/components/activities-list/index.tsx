@@ -77,8 +77,14 @@ export class ActivitiesList extends React.Component<IActivitiesListProps, IActiv
 
         return !this.state.error ? null : (
             <MessageBar
+                styles={{
+                    root: {
+                        background: '#F5C3D0',
+                        position: 'sticky',
+                        top: '0px',
+                    }
+                }}
                 messageBarType={MessageBarType.error}
-                className={'activities-list_message-bar'}
                 onDismiss={onDismiss}
             >
                 {this.state.error}

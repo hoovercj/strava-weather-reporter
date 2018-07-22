@@ -7,11 +7,3 @@
 .activities-list_load-more-button {
     margin-bottom: 12px;
 }
-
-.activities-list_message-bar {
-    /* Use sticky positioning where available, otherwise fall back to relative positioning. */
-    position: relative;
-    position: sticky;
-    top: 0px;
-    background: #F5C3D0;
-}
