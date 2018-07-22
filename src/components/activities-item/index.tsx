@@ -46,13 +46,6 @@ export class ActivitiesItem extends React.Component<IActivitiesItemProps> {
                         <Link
                             onClick={this.onInvoked}
                             className={'activity-item_name'}
-                            styles={{
-                                root: {
-                                    // Office fabric sets this to 'relative' which
-                                    // makes the text appear above the sticky error bar
-                                    position: 'inherit',
-                                }
-                            }}
                         >
                             {name}
                         </Link>

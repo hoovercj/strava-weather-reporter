@@ -17,7 +17,7 @@
     margin-bottom: auto;
 }
 
-.activity-item_name {
+.activity-item_container .activity-item_name {
     font-size: 20px;
     font-weight: 600;
     line-height: 1.333;
@@ -25,6 +25,11 @@
     margin-bottom: 6px;
     /* This is a link, but avoid changing the color unless hovered or focused */
     color: currentColor;
+}
+
+.activity-item_container .activity-item_name:hover,
+.activity-item_container .activity-item_name:focus {
+    color: #005b83;
 }
 
 .activity-item_map-wrapper {

@@ -82,6 +82,7 @@ export class ActivitiesList extends React.Component<IActivitiesListProps, IActiv
                         background: '#F5C3D0',
                         position: 'sticky',
                         top: '0px',
+                        zIndex: 1,
                     }
                 }}
                 messageBarType={MessageBarType.error}
