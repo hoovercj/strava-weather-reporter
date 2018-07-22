@@ -67,8 +67,6 @@ class App extends React.Component<IAppProps, IAppState> {
             this.props.strava.exchangeCodeForUserInformation(code)
                 .then(this.handleUserInformation)
                 .catch(this.handleAuthError);
-        } else {
-            this.props.strava.wakeup().catch();
         }
     }
 
