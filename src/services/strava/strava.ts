@@ -94,6 +94,7 @@ export class Strava implements IStrava {
     public processedActivities = (): Promise<string[]> => {
         const apiUrl = `${this.config.backendUrl}/processedactivities/${this.cachedUserInformation().id}`;
         const params = {
+            code: this.config.backendCode,
             token: this.getAuthToken(),
         }
         const url = this.getUrlWithParams(apiUrl, params);
