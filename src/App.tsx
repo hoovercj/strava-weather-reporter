@@ -108,7 +108,7 @@ class App extends React.Component<IAppProps, IAppState> {
         if (this.state.userInfo || !this.state.authenticating) {
             return;
         }
-        
+
         return (
             <LoadingOverlay
                 key='authenticating'

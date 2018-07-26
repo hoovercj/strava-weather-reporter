@@ -22,6 +22,7 @@ const stravaConfig: IStravaConfiguration = {
     stravaCodeRedirectUri: process.env.REACT_APP_STRAVA_CODE_REDIRECT_URL || '',
 }
 const strava = new Strava(stravaConfig, storage);
+
 const activitiesPerPage = process.env.REACT_APP_ACTIVITIES_PER_PAGE;
 const applicationInfo: IAppInfo = {
     applicationName: process.env.REACT_APP_APPLICATION_NAME || '',

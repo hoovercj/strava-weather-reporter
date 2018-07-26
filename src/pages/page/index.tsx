@@ -13,7 +13,7 @@ export interface IPageProps {
     strava: IStrava;
 }
 
-export abstract class Page<T extends IPageProps> extends React.Component<T> {
+export abstract class Page<T extends IPageProps, S = {}> extends React.Component<T, S> {
     public render() {
         return (
             <div className={this.containerClass()}>
@@ -41,7 +41,7 @@ export abstract class Page<T extends IPageProps> extends React.Component<T> {
     protected headerClass(): string {
         return 'page_header';
     }
-    
+
     protected contentClass(): string {
         return 'page_content';
     }

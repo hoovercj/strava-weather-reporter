@@ -4,6 +4,7 @@ import {
     SummaryActivity,
 } from 'src/lib/strava';
 import { IStorage } from 'src/services/storage';
+import { getUrlWithParams } from 'src/utils/query-string';
 
 export type IActivitiesApi = ActivitiesApi;
 export type ISummaryActivity = SummaryActivity;
@@ -11,8 +12,6 @@ export type ISummaryActivity = SummaryActivity;
 export interface ISummaryActivityWithDescription extends ISummaryActivity {
     description: string;
 }
-
-type primitive = string | number | boolean;
 
 export interface IStravaConfiguration {
     backendCode: string;
@@ -30,6 +29,10 @@ export interface IStrava {
     exchangeCodeForUserInformation(code: string): Promise<IUserInfo>;
     redirectToStravaAuthorizationPage(): void;
     cachedUserInformation(): IUserInfo | undefined;
+    cachedSettings(): IUserSettings | undefined;
+    updateSettings(userSettings: IUserSettings): Promise<void>;
+    getSettings(): Promise<IUserSettings>;
+
     clearCachedInformation(): void;
 }
 
@@ -48,7 +51,26 @@ export interface IUserInfo {
     email: string;
 }
 
+export interface IUserSettings {
+    displaySettings: IDisplaySettings;
+}
+
+export interface IDisplaySettings {
+    units: DisplayUnits,
+}
+
+export enum DisplayUnits {
+    Miles = 'Miles',
+    Kilometers = 'Kilometers',
+}
+
 export class Strava implements IStrava {
+
+    public static defaultUserSettings: IUserSettings = {
+        displaySettings: {
+            units: DisplayUnits.Miles,
+        }
+    }
 
     public static getStravaUrl = () => {
         return 'https://www.strava.com';
@@ -67,6 +89,7 @@ export class Strava implements IStrava {
 
     private readonly STRAVA_AUTH_INFO_STORAGE_KEY = 'STRAVA_AUTH_INFO';
     private readonly STRAVA_PROCESSED_ACTIVITIES_STORAGE_KEY = 'STRAVA_PROCESSED_ACTIVITIES';
+    private readonly STRAVA_USER_SETTINGS_STORAGE_KEY = 'STRAVA_USER_SETTINGS';
 
     constructor(private config: IStravaConfiguration, private storage: IStorage) {
         const apiConfig: Configuration = { accessToken: this.getAuthToken };
@@ -92,12 +115,17 @@ export class Strava implements IStrava {
     }
 
     public processedActivities = (): Promise<string[]> => {
-        const apiUrl = `${this.config.backendUrl}/processedactivities/${this.cachedUserInformation().id}`;
+        const userId = this.cachedUserInformation().id;
+        if (!userId) {
+            return Promise.resolve([]);
+        }
+
+        const apiUrl = `${this.config.backendUrl}/processedactivities/${userId}`;
         const params = {
             code: this.config.backendCode,
             token: this.getAuthToken(),
         }
-        const url = this.getUrlWithParams(apiUrl, params);
+        const url = getUrlWithParams(apiUrl, params);
 
         return fetch(url)
             .then(response => response.json())
@@ -113,7 +141,7 @@ export class Strava implements IStrava {
             code: this.config.backendCode,
             stravacode: stravaCode,
         };
-        const url = this.getUrlWithParams(authUrl, params);
+        const url = getUrlWithParams(authUrl, params);
 
         return fetch(url, { method: 'POST' })
             .then(response => response.json())
@@ -137,7 +165,7 @@ export class Strava implements IStrava {
             code: this.config.backendCode,
             token: this.getAuthToken(),
         }
-        const url = this.getUrlWithParams(descriptionUrl, params);
+        const url = getUrlWithParams(descriptionUrl, params);
 
         const response = await fetch(url, { method });
         return response.status === 200
@@ -154,10 +182,64 @@ export class Strava implements IStrava {
             scope: 'write',
         }
 
-        const url = this.getUrlWithParams(stravaBaseUrl, params);
+        const url = getUrlWithParams(stravaBaseUrl, params);
 
         (window.location as any) = url;
     }
+
+    public updateSettings = (settings: IUserSettings): Promise<void> => {
+        const userId = this.cachedUserInformation()
+                    && this.cachedUserInformation().id;
+
+        if (!userId) {
+            return Promise.reject();
+        }
+
+        this.storage.setItem(this.STRAVA_USER_SETTINGS_STORAGE_KEY, settings);
+
+
+        const apiUrl = `${this.config.backendUrl}/settings/${userId}`;
+        const params = {
+            code: this.config.backendCode,
+            token: this.getAuthToken(),
+        }
+        const url = getUrlWithParams(apiUrl, params);
+
+        return fetch(url, {
+            body: JSON.stringify(settings),
+            method: 'POST',
+        })
+        .then(() => {/* Do nothing */});
+    }
+
+    public getSettings = (): Promise<IUserSettings> => {
+        const userId = this.cachedUserInformation()
+                    && this.cachedUserInformation().id;
+
+        if (!userId) {
+            return Promise.reject();
+        }
+
+        const apiUrl = `${this.config.backendUrl}/settings/${userId}`;
+        const params = {
+            code: this.config.backendCode,
+            token: this.getAuthToken(),
+        }
+        const url = getUrlWithParams(apiUrl, params);
+
+        return fetch(url)
+            .then(response => response.json())
+            .then((userSettings: IUserSettings) => {
+                this.setCachedValue<IUserSettings>(this.STRAVA_USER_SETTINGS_STORAGE_KEY, userSettings);
+                return userSettings;
+            });
+    }
+
+    public cachedSettings = (): IUserSettings | undefined => {
+        return this.getCachedValue<IUserSettings>(this.STRAVA_USER_SETTINGS_STORAGE_KEY);
+    }
+
+
 
     private getAuthToken = (): string => {
         const authInfo = this.cachedStravaAuthInfo();
@@ -168,30 +250,22 @@ export class Strava implements IStrava {
         return this.getCachedValue<IStravaAuthenticationResponse>(this.STRAVA_AUTH_INFO_STORAGE_KEY);
     }
 
-    private setCachedValue = (key: string, value: any): void => {
+    private setCachedValue = <T>(key: string, value: T): void => {
         this.cache[key] = value;
-        this.storage.setItem(key, JSON.stringify(value));
+        this.storage.setItem<T>(key, value);
     }
 
     private getCachedValue = <T>(key: string): T => {
         if (!this.cache[key]) {
-            const storedStravaAuthInfoString = this.storage.getItem(key);
-            if (storedStravaAuthInfoString) {
+            const cachedValue = this.storage.getItem<T>(key);
+            if (cachedValue) {
                 try {
-                    this.cache[key] = JSON.parse(storedStravaAuthInfoString);
+                    this.cache[key] = cachedValue;
                 } catch (e) {
                     this.storage.removeItem(key);
                 }
             }
         }
         return this.cache[key];
-    }
-
-    private getUrlWithParams = (url: string, params: { [key: string]: primitive }) => {
-        const paramsString = Object.keys(params).map(key => {
-            return `&${key}=${params[key]}`
-        }).join('&');
-
-        return `${url}?${paramsString}`;
     }
 }
