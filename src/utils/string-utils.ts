@@ -1,26 +1,26 @@
 import { format } from 'date-fns';
 
-import { DisplayUnits } from 'src/services/strava/strava';
+import { DistanceUnits } from 'src/services/strava/strava';
 
 export const dateToDateTimeString = (date: Date): string => {
     return format(date, 'MMMM Do[,] YYYY [at] h[:]mm a')
 }
 
-export const metersPerSecondToDisplayString = (metersPerSecond: number, displayUnits: DisplayUnits): string => {
-    switch (displayUnits) {
-        case DisplayUnits.Kilometers:
+export const metersPerSecondToDisplayString = (metersPerSecond: number, distanceUnits: DistanceUnits): string => {
+    switch (distanceUnits) {
+        case DistanceUnits.Kilometers:
             return metersPerSecondToMinutesPerKilometerString(metersPerSecond);
-        case DisplayUnits.Miles:
+        case DistanceUnits.Miles:
         default:
             return metersPerSecondToMinutesPerMileString(metersPerSecond);
     }
 }
 
-export const distanceInMetersToDisplayString = (distanceInMeters: number, displayUnits: DisplayUnits): string => {
-    switch (displayUnits) {
-        case DisplayUnits.Kilometers:
+export const distanceInMetersToDisplayString = (distanceInMeters: number, distanceUnits: DistanceUnits): string => {
+    switch (distanceUnits) {
+        case DistanceUnits.Kilometers:
             return distanceInMetersToKmString(distanceInMeters);
-            case DisplayUnits.Miles:
+            case DistanceUnits.Miles:
             default:
             return distanceInMetersToMileString(distanceInMeters);
     }

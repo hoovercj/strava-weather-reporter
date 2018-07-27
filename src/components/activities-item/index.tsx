@@ -3,7 +3,7 @@ import { Link, Icon } from 'office-ui-fabric-react';
 import * as React from 'react';
 import { IActivityStatistic } from 'src/components/activity-statistic';
 import { StatisticGroup } from 'src/components/statistic-group';
-import { DisplayUnits, ISummaryActivity } from 'src/services/strava/strava';
+import { DistanceUnits, ISummaryActivity } from 'src/services/strava/strava';
 import {
     distanceInMetersToDisplayString,
     durationInSecondsToString,
@@ -15,7 +15,7 @@ import './index.css';
 import { Card } from 'src/components/card';
 
 export interface IActivitiesItemProps {
-    units: DisplayUnits;
+    units: DistanceUnits;
     activity: ISummaryActivity;
     processed?: boolean;
     onInvoked?: (activity: ISummaryActivity) => void;

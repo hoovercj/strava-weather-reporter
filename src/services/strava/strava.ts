@@ -52,24 +52,26 @@ export interface IUserInfo {
 }
 
 export interface IUserSettings {
-    displaySettings: IDisplaySettings;
+    distanceUnits: DistanceUnits;
+    weatherUnits: WeatherUnits;
 }
 
-export interface IDisplaySettings {
-    units: DisplayUnits,
-}
-
-export enum DisplayUnits {
+export enum DistanceUnits {
     Miles = 'Miles',
     Kilometers = 'Kilometers',
+}
+
+export enum WeatherUnits {
+    Metric = 'Metric',
+    Imperial = 'Imperial',
+    Both = 'Both',
 }
 
 export class Strava implements IStrava {
 
     public static defaultUserSettings: IUserSettings = {
-        displaySettings: {
-            units: DisplayUnits.Miles,
-        }
+        distanceUnits: DistanceUnits.Miles,
+        weatherUnits: WeatherUnits.Both,
     }
 
     public static getStravaUrl = () => {

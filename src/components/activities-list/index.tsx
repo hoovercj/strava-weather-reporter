@@ -219,7 +219,7 @@ export class ActivitiesList extends React.Component<IActivitiesListProps, IActiv
                 activity={item}
                 onInvoked={this.onActivityClicked}
                 processed={processed}
-                units={this.props.userSettings.displaySettings.units}
+                units={this.props.userSettings.distanceUnits}
             />
         );
     }

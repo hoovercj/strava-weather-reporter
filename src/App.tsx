@@ -20,10 +20,11 @@ import { IAppInfo } from 'src/models/copyright-info';
 import { ActivitiesPage } from 'src/pages/activities';
 import { LandingPage } from 'src/pages/landing';
 import {
-    DisplayUnits,
+    DistanceUnits,
     IStrava,
     IUserInfo,
     IUserSettings,
+    WeatherUnits,
 } from 'src/services/strava/strava';
 import {
     clearQueryString,
@@ -46,9 +47,8 @@ interface IAppState {
 class App extends React.Component<IAppProps, IAppState> {
 
     private static DEFAULT_USER_SETTINGS: IUserSettings = {
-        displaySettings: {
-            units: DisplayUnits.Miles,
-        }
+        distanceUnits: DistanceUnits.Miles,
+        weatherUnits: WeatherUnits.Both,
     }
 
     constructor(props: IAppProps) {
