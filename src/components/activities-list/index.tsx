@@ -15,6 +15,7 @@ import {
     IStrava,
     ISummaryActivity,
     ISummaryActivityWithDescription,
+    IUserSettings,
 } from 'src/services/strava/strava';
 import './index.css';
 
@@ -28,6 +29,7 @@ enum LoadingState {
 export interface IActivitiesListProps {
     strava: IStrava;
     itemsPerPage: number;
+    userSettings: IUserSettings;
 }
 
 export interface ISummaryActivityWithDescription extends ISummaryActivity {
@@ -212,7 +214,14 @@ export class ActivitiesList extends React.Component<IActivitiesListProps, IActiv
 
     private renderActivitiesItem = (item: ISummaryActivity) => {
         const processed = this.state.processedActivities.indexOf(String(item.id)) >= 0;
-        return <ActivitiesItem activity={item} onInvoked={this.onActivityClicked} processed={processed} />
+        return (
+            <ActivitiesItem
+                activity={item}
+                onInvoked={this.onActivityClicked}
+                processed={processed}
+                units={this.props.userSettings.displaySettings.units}
+            />
+        );
     }
 
     private renderLoadingSpinner = () => {
@@ -265,7 +274,6 @@ export class ActivitiesList extends React.Component<IActivitiesListProps, IActiv
 
         return (
             <ActivityDialog
-                visible={!!activity}
                 onDismiss={this.onDialogDismiss}
                 onApprove={this.onDialogApprove}
                 activity={activity}
@@ -285,7 +293,7 @@ export class ActivitiesList extends React.Component<IActivitiesListProps, IActiv
 
     private fetchProcessedActivities = async (): Promise<void> => {
         const processedActivities = await this.props.strava.processedActivities();
-        
+
         this.setState({
             processedActivities,
         });

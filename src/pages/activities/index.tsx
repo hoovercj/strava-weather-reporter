@@ -13,17 +13,17 @@ import {
 } from 'src/pages/settings';
 import {
     IUserSettings,
-    Strava,
 } from 'src/services/strava/strava';
 
 interface IActivitiesPageState {
     settingsOpened?: boolean;
-    userSettings: IUserSettings;
 }
 
 export interface IActivitiesPageProps extends IPageProps {
     activitiesPerPage: number;
     onSignOut: () => void;
+    userSettings: IUserSettings;
+    updateUserSettings: (userSettings: IUserSettings) => Promise<boolean>;
 }
 
 export class ActivitiesPage extends Page<IActivitiesPageProps, IActivitiesPageState> {
@@ -32,18 +32,6 @@ export class ActivitiesPage extends Page<IActivitiesPageProps, IActivitiesPageSt
         super(props);
         this.state = {
             settingsOpened: false,
-            userSettings: this.props.strava.cachedSettings() || Strava.defaultUserSettings,
-        }
-    }
-
-    public async componentDidMount() {
-        try {
-            const settings = await this.props.strava.getSettings();
-            if (settings) {
-                this.setState({ userSettings: settings });
-            }
-        } catch {
-            // Use default settings
         }
     }
 
@@ -74,6 +62,7 @@ export class ActivitiesPage extends Page<IActivitiesPageProps, IActivitiesPageSt
             <ActivitiesList
                 itemsPerPage={this.props.activitiesPerPage}
                 strava={this.props.strava}
+                userSettings={this.props.userSettings}
             />
         );
     }
@@ -85,30 +74,31 @@ export class ActivitiesPage extends Page<IActivitiesPageProps, IActivitiesPageSt
 
         return (
             <SettingsPage
-                userSettings={this.state.userSettings}
+                userSettings={this.props.userSettings}
                 onSave={this.onSettingsSaved}
                 onDismiss={this.onSettingsDismissed}
             />
-        )
+        );
     }
 
     private onSettingsDismissed = () => {
         this.setState({
             settingsOpened: false,
-        })
+        });
+        return Promise.resolve();
     }
 
     private onSettingsClicked = () => {
         this.setState({
             settingsOpened: true,
-        })
+        });
     }
 
     private onSettingsSaved = async (userSettings: IUserSettings) => {
-        await this.props.strava.updateSettings(userSettings)
+        // TODO: do something based on success or failure
+        await this.props.updateUserSettings(userSettings)
         this.setState({
             settingsOpened: false,
-            userSettings,
         });
     }
 }

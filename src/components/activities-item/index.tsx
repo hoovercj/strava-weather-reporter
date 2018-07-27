@@ -3,24 +3,27 @@ import { Link, Icon } from 'office-ui-fabric-react';
 import * as React from 'react';
 import { IActivityStatistic } from 'src/components/activity-statistic';
 import { StatisticGroup } from 'src/components/statistic-group';
-import { ISummaryActivity } from 'src/services/strava/strava';
+import { DisplayUnits, ISummaryActivity } from 'src/services/strava/strava';
 import {
-    distanceInMetersToMileString,
+    distanceInMetersToDisplayString,
     durationInSecondsToString,
-    metersPerSecondToMinutesPerMileString,
-    dateToDateTimeString
+    metersPerSecondToDisplayString,
+    dateToDateTimeString,
 } from 'src/utils/string-utils';
 import './index.css';
 
 import { Card } from 'src/components/card';
 
 export interface IActivitiesItemProps {
+    units: DisplayUnits;
     activity: ISummaryActivity;
     processed?: boolean;
     onInvoked?: (activity: ISummaryActivity) => void;
 }
 
 export class ActivitiesItem extends React.Component<IActivitiesItemProps> {
+
+
     public render() {
         const activity = this.props.activity;
 
@@ -29,10 +32,10 @@ export class ActivitiesItem extends React.Component<IActivitiesItemProps> {
 
         const stats: IActivityStatistic[] = [{
             name: 'Distance',
-            value: activity.distance && distanceInMetersToMileString(activity.distance) || '',
+            value: activity.distance && distanceInMetersToDisplayString(activity.distance, this.props.units) || '',
         },{
             name: 'Pace',
-            value: activity.average_speed && metersPerSecondToMinutesPerMileString(activity.average_speed) || '',
+            value: activity.average_speed && metersPerSecondToDisplayString(activity.average_speed, this.props.units) || '',
         },{
             name: 'Time',
             value: activity.elapsed_time && durationInSecondsToString(activity.elapsed_time) || '',

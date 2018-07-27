@@ -1,20 +1,17 @@
 import {
     ChoiceGroup,
-    DefaultButton,
-    Dialog,
-    DialogFooter,
     IChoiceGroupOption,
-    PrimaryButton,
     TooltipHost,
 } from 'office-ui-fabric-react';
 import * as React from 'react';
 
+import { Dialog } from 'src/components/dialog';
 import { DisplayUnits, IUserSettings } from 'src/services/strava/strava';
 
 export interface ISettingsPageProps {
     userSettings: IUserSettings;
-    onSave: (settings: IUserSettings) => void;
-    onDismiss: () => void;
+    onSave: (settings: IUserSettings) => Promise<void>;
+    onDismiss: () => Promise<void>;
 }
 
 interface ISettingsPageState {
@@ -34,9 +31,18 @@ export class SettingsPage extends React.Component<ISettingsPageProps, ISettingsP
     public render() {
         return (
             <Dialog
-                hidden={false}
+                renderContent={this.renderContent}
+                approveButtonText={'Save settings'}
+                dismissButtonText={'Cancel'}
+                onApprove={this.onSave}
                 onDismiss={this.props.onDismiss}
-            >
+            />
+        )
+    }
+
+    private renderContent = (): JSX.Element => {
+        return (
+            <React.Fragment>
                 <h1>Settings</h1>
                 <TooltipHost
                     calloutProps={{
@@ -62,6 +68,7 @@ export class SettingsPage extends React.Component<ISettingsPageProps, ISettingsP
                     label='Units'
                     onChange={this.onDisplayUnitsChanged}
                 />
+                {/* TODO: Add additional settings below */}
                 {/* <TooltipHost
                     content='These settings apply apply to the descriptions added to Strava activities.'
                     calloutProps={{
@@ -70,16 +77,12 @@ export class SettingsPage extends React.Component<ISettingsPageProps, ISettingsP
                 >
                     <h2>Description Settings</h2>
                 </TooltipHost> */}
-                <DialogFooter>
-                    <PrimaryButton onClick={this.onSave} text='Save Settings' />
-                    <DefaultButton onClick={this.props.onDismiss} text='Cancel' />
-                </DialogFooter>
-            </Dialog>
+            </React.Fragment>
         )
     }
 
-    private onSave = () => {
-        this.props.onSave({
+    private onSave = (): Promise<void> => {
+        return this.props.onSave({
             displaySettings: {
                 units: this.state.displayUnits,
             }
