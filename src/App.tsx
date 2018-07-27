@@ -19,7 +19,13 @@ import { LoadingOverlay } from 'src/components/loading-overlay';
 import { IAppInfo } from 'src/models/copyright-info';
 import { ActivitiesPage } from 'src/pages/activities';
 import { LandingPage } from 'src/pages/landing';
-import { IStrava, IUserInfo } from 'src/services/strava/strava';
+import {
+    DistanceUnits,
+    IStrava,
+    IUserInfo,
+    IUserSettings,
+    WeatherUnits,
+} from 'src/services/strava/strava';
 import {
     clearQueryString,
     getQueryStringValue,
@@ -34,10 +40,16 @@ interface IAppProps {
 interface IAppState {
     authenticating?: boolean;
     userInfo?: IUserInfo;
+    userSettings: IUserSettings;
     error?: string;
 }
 
 class App extends React.Component<IAppProps, IAppState> {
+
+    private static DEFAULT_USER_SETTINGS: IUserSettings = {
+        distanceUnits: DistanceUnits.Miles,
+        weatherUnits: WeatherUnits.Both,
+    }
 
     constructor(props: IAppProps) {
         super(props);
@@ -46,7 +58,14 @@ class App extends React.Component<IAppProps, IAppState> {
             authenticating: false,
             error: undefined,
             userInfo: this.props.strava.cachedUserInformation(),
+            userSettings: this.props.strava.cachedSettings() || App.DEFAULT_USER_SETTINGS,
         };
+    }
+
+    public componentDidUpdate(prevProps: IAppProps, prevState: IAppState): void {
+        if (!prevState.userInfo && this.state.userInfo) {
+            this.getSettings();
+        }
     }
 
     public componentDidMount(): void {
@@ -63,10 +82,11 @@ class App extends React.Component<IAppProps, IAppState> {
         // If we have a code in the query parameters, exchange it for user info
         const code = getQueryStringValue('code');
         if (code) {
-            this.setState({authenticating: true});
-            this.props.strava.exchangeCodeForUserInformation(code)
-                .then(this.handleUserInformation)
-                .catch(this.handleAuthError);
+            this.authenticate(code);
+        }
+
+        if (this.state.userInfo) {
+           this.getSettings();
         }
     }
 
@@ -82,6 +102,29 @@ class App extends React.Component<IAppProps, IAppState> {
                 authPage,
                 mainContent,
             ];
+    }
+
+    private getSettings = (): Promise<void> => {
+        return this.props.strava.getSettings()
+            .then(this.handleGetUserSettings)
+            .catch(this.handleGetUserSettingsError);
+    }
+
+    private handleGetUserSettings = (settings: IUserSettings): void => {
+        this.setState({
+            userSettings: settings,
+        });
+    }
+
+    private handleGetUserSettingsError = (): void => {
+        // Do nothing
+    }
+
+    private authenticate = (code: string): Promise<void> => {
+        this.setState({authenticating: true});
+        return this.props.strava.exchangeCodeForUserInformation(code)
+            .then(this.handleUserInformation)
+            .catch(this.handleAuthError);
     }
 
     private renderErrorDialog = () => {
@@ -108,7 +151,7 @@ class App extends React.Component<IAppProps, IAppState> {
         if (this.state.userInfo || !this.state.authenticating) {
             return;
         }
-        
+
         return (
             <LoadingOverlay
                 key='authenticating'
@@ -138,6 +181,8 @@ class App extends React.Component<IAppProps, IAppState> {
                 activitiesPerPage={this.props.activitiesPerPage}
                 applicationInfo={this.props.applicationInfo}
                 onSignOut={this.signOut}
+                userSettings={this.state.userSettings}
+                updateUserSettings={this.updateUserSettings}
                 strava={this.props.strava}
             />
         )
@@ -165,6 +210,17 @@ class App extends React.Component<IAppProps, IAppState> {
             authenticating: false,
             userInfo: info,
         });
+    }
+
+    private updateUserSettings = (userSettings: IUserSettings): Promise<boolean> => {
+        return this.props.strava.updateSettings(userSettings)
+            .then(() => {
+                this.setState({
+                    userSettings,
+                });
+                return true;
+            })
+            .catch(() => false);
     }
 
     private getCustomTheme = (): ITheme => {

@@ -1,22 +1,22 @@
 export interface IStorage {
     clear: () => void;
-    getItem: (key: string) => string | null;
-    setItem: (key: string, value: string) => void;
+    getItem: <T>(key: string) => T | undefined;
+    setItem: <T>(key: string, value: T) => void;
     removeItem: (key: string) => void;
 }
 
 class MemoryStorage implements IStorage {
-    private storage = {};
+    private storage: {[key: string]: any} = {};
 
     public clear = (): void => {
         this.storage = {};
     }
 
-    public getItem = (key: string): string => {
+    public getItem = <T>(key: string, parse = true): T => {
         return this.storage[key];
     }
 
-    public setItem = (key: string, value: string): void => {
+    public setItem = <T>(key: string, value: T): void => {
         this.storage[key] = value;
     }
 
@@ -42,12 +42,21 @@ class LocalStorage implements IStorage {
         localStorage.clear();
     }
 
-    public getItem = (key: string): string | null => {
-        return localStorage.getItem(key);
+    public getItem = <T>(key: string): T | undefined => {
+        const storedValue = localStorage.getItem(key);
+        if (!storedValue) {
+            return undefined;
+        }
+
+        try {
+            return JSON.parse(storedValue || '');
+        } catch (e) {
+            return undefined;
+        }
     }
 
-    public setItem = (key: string, value: string): void => {
-        localStorage.setItem(key, value);
+    public setItem = <T>(key: string, value: T): void => {
+        localStorage.setItem(key, JSON.stringify(value));
     }
 
     public removeItem = (key: string): void => {
@@ -71,11 +80,11 @@ export class Storage implements IStorage {
         this.storage.clear();
     }
 
-    public getItem = (key: string): string | null => {
-        return this.storage.getItem(key);
+    public getItem = <T>(key: string): T | undefined => {
+        return this.storage.getItem<T>(key);
     }
 
-    public setItem = (key: string, value: string): void => {
+    public setItem = <T>(key: string, value: T): void => {
         this.storage.setItem(key, value);
     }
 

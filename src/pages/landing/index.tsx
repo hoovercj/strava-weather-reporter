@@ -11,14 +11,15 @@ export interface ILandingProps extends IPageProps {
     strava: IStrava;
 }
 
-export class LandingPage extends Page<ILandingProps> { 
+export class LandingPage extends Page<ILandingProps> {
+
     protected renderHeader() {
         return ([
             <h1 key='title' className='landing_header_title'>{this.props.applicationInfo.applicationName}</h1>,
             <sub key='sub' className='landing_header_sub'>Quickly and easily add weather information to activity descriptions.</sub>
         ])
     }
-    
+
     protected renderContent() {
         return ([
             <p key='big' className='landing_body_text landing_body_text-big'>Rain or shine, hot or cold, you're out there.</p>,

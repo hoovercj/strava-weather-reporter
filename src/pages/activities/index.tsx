@@ -1,20 +1,50 @@
-import { Link } from 'office-ui-fabric-react';
+import {
+    IconButton,
+    Link,
+} from 'office-ui-fabric-react';
 import * as React from 'react';
 
-import { ActivitiesList } from "src/components/activities-list";
-import { PageHeader } from "src/components/page-header";
-import { IPageProps, Page } from "src/pages/page";
+
+import { ActivitiesList } from 'src/components/activities-list';
+import { PageHeader } from 'src/components/page-header';
+import { IPageProps, Page } from 'src/pages/page';
+import {
+    SettingsPage
+} from 'src/pages/settings';
+import {
+    IUserSettings,
+} from 'src/services/strava/strava';
+
+interface IActivitiesPageState {
+    settingsOpened?: boolean;
+}
 
 export interface IActivitiesPageProps extends IPageProps {
     activitiesPerPage: number;
     onSignOut: () => void;
+    userSettings: IUserSettings;
+    updateUserSettings: (userSettings: IUserSettings) => Promise<boolean>;
 }
 
-export class ActivitiesPage extends Page<IActivitiesPageProps> {
+export class ActivitiesPage extends Page<IActivitiesPageProps, IActivitiesPageState> {
+
+    protected constructor(props: IActivitiesPageProps) {
+        super(props);
+        this.state = {
+            settingsOpened: false,
+        }
+    }
 
     protected renderHeader() {
         return (
             <PageHeader pageTitle={this.props.applicationInfo.applicationName}>
+                <IconButton
+                    ariaLabel={'Settings'}
+                    iconProps={{
+                        iconName: 'Settings'
+                    }}
+                    onClick={this.onSettingsClicked}
+                />
                 <Link
                     className={'color_neutral-primary-alt'}
                     key={'page-sign-out'}
@@ -22,6 +52,7 @@ export class ActivitiesPage extends Page<IActivitiesPageProps> {
                 >
                     {`Log Out`}
                 </Link>
+                {this.renderSettings()}
             </PageHeader>
         );
     }
@@ -31,7 +62,43 @@ export class ActivitiesPage extends Page<IActivitiesPageProps> {
             <ActivitiesList
                 itemsPerPage={this.props.activitiesPerPage}
                 strava={this.props.strava}
+                userSettings={this.props.userSettings}
             />
         );
+    }
+
+    protected renderSettings = () => {
+        if (!this.state.settingsOpened) {
+            return;
+        }
+
+        return (
+            <SettingsPage
+                userSettings={this.props.userSettings}
+                onSave={this.onSettingsSaved}
+                onDismiss={this.onSettingsDismissed}
+            />
+        );
+    }
+
+    private onSettingsDismissed = () => {
+        this.setState({
+            settingsOpened: false,
+        });
+        return Promise.resolve();
+    }
+
+    private onSettingsClicked = () => {
+        this.setState({
+            settingsOpened: true,
+        });
+    }
+
+    private onSettingsSaved = async (userSettings: IUserSettings) => {
+        // TODO: do something based on success or failure
+        await this.props.updateUserSettings(userSettings)
+        this.setState({
+            settingsOpened: false,
+        });
     }
 }
