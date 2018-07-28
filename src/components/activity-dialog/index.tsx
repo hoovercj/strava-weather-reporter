@@ -16,6 +16,7 @@ export interface IActivityDialogProps {
     activity: ISummaryActivityWithDescription;
     onApprove: (activity: ISummaryActivityWithDescription) => Promise<void>;
     onDismiss: () => Promise<void>;
+    processed?: boolean;
 }
 
 export class ActivityDialog extends React.Component<IActivityDialogProps> {
@@ -24,18 +25,48 @@ export class ActivityDialog extends React.Component<IActivityDialogProps> {
     }
 
     public render() {
-        return (
-            <Dialog
-                onApprove={this.onApprove}
-                onDismiss={this.props.onDismiss}
-                renderContent={this.renderContent}
-                approveButtonText='Update settings'
-                dismissButtonText='Cancel'
-            />
-        )
+        if (this.props.processed) {
+            return (
+                <Dialog
+                    onDismiss={this.props.onDismiss}
+                    renderContent={this.renderViewContent}
+                    dismissButtonText='Close'
+                />
+            );
+        } else {
+            return (
+                <Dialog
+                    onApprove={this.onApprove}
+                    onDismiss={this.props.onDismiss}
+                    renderContent={this.renderEditContent}
+                    approveButtonText='Update settings'
+                    dismissButtonText='Cancel'
+                />
+            );
+        }
     }
 
-    private renderContent = (): JSX.Element => {
+    private renderViewContent = (): JSX.Element => {
+        const titleId = 'edit-activity-description-dialog-title';
+
+        return (
+            <React.Fragment>
+                {/* TODO: ensure that this is read by a screenreader when opening the dialog */}
+                <h1 className={'activity-dialog_title'} id={titleId}>View Activity Description</h1>
+                <p>
+                    The description was previously set to the content below for activity {this.renderActivityLink()}
+                </p>
+                <TextField
+                    readOnly={true}
+                    value={this.props.activity.description}
+                    multiline={true}
+                    aria-labelledby={titleId}
+                />
+            </React.Fragment>
+        );
+    }
+
+    private renderEditContent = (): JSX.Element => {
         const titleId = 'edit-activity-description-dialog-title';
 
         return (

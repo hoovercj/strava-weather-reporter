@@ -9,10 +9,10 @@ import { ThemedButton } from 'src/components/themed-button';
 import { ICancelablePromise, makeCancelable } from 'src/utils/promise-utils';
 
 export interface IDialogProps {
-    onApprove: () => Promise<void>
+    onApprove?: () => Promise<void>
     onDismiss: () => Promise<void>;
     renderContent: () => JSX.Element;
-    approveButtonText: string;
+    approveButtonText?: string;
     dismissButtonText: string;
 }
 
@@ -37,6 +37,7 @@ export abstract class Dialog extends React.Component<IDialogProps, IDialogState>
     public render() {
         return (
             <FabricDialog
+                closeButtonAriaLabel={'Cancel and close'}
                 hidden={false}
                 dialogContentProps={{
                     type: DialogType.normal,
@@ -48,7 +49,9 @@ export abstract class Dialog extends React.Component<IDialogProps, IDialogState>
             >
                 {this.props.renderContent()}
                 <DialogFooter>
-                    <ThemedButton disabled={this.state.busy} primary={true} onClick={this.onApproveButtonClicked} text={this.props.approveButtonText} />
+                    { this.props.onApprove &&
+                        <ThemedButton disabled={this.state.busy} primary={true} onClick={this.onApproveButtonClicked} text={this.props.approveButtonText} />
+                    }
                     <ThemedButton disabled={this.state.busy} onClick={this.onDismissButtonClicked} text={this.props.dismissButtonText} />
                 </DialogFooter>
             </FabricDialog>
@@ -88,7 +91,8 @@ export abstract class Dialog extends React.Component<IDialogProps, IDialogState>
     }
 
     private onApproveButtonClickedCore = async () => {
-        this.onDialogButtonClickedCore(this.props.onApprove());
+        const promise = (this.props.onApprove && this.props.onApprove()) || Promise.resolve()
+        this.onDialogButtonClickedCore(promise);
     }
 
     private onDialogButtonClickedCore = (promise: Promise<any>) => {

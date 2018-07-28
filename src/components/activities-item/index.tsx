@@ -61,7 +61,7 @@ export class ActivitiesItem extends React.Component<IActivitiesItemProps> {
                     <div className={'activity-item_map-wrapper'}>
                         { map &&
                             // Consider lifting this key to a prop
-                            <img className={'activity-item_map'} src={`http://maps.googleapis.com/maps/api/staticmap?sensor=false&size=300x200&path=weight:3%7Ccolor:red%7Cenc:${map}&key=${process.env.REACT_APP_GOOGLE_MAPS_API_KEY}`} />
+                            <img alt={`Map of route for activity "${name}"`} className={'activity-item_map'} src={`http://maps.googleapis.com/maps/api/staticmap?sensor=false&size=300x200&path=weight:3%7Ccolor:red%7Cenc:${map}&key=${process.env.REACT_APP_GOOGLE_MAPS_API_KEY}`} />
                         }
                     </div>
                 </div>

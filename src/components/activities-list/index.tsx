@@ -92,6 +92,7 @@ export class ActivitiesList extends React.Component<IActivitiesListProps, IActiv
                 }}
                 messageBarType={MessageBarType.error}
                 onDismiss={onDismiss}
+                dismissButtonAriaLabel={'Close'}
             >
                 {this.state.error}
             </MessageBar>
@@ -272,11 +273,14 @@ export class ActivitiesList extends React.Component<IActivitiesListProps, IActiv
             return null;
         }
 
+        const processed = this.state.processedActivities.indexOf(String(activity.id)) >= 0;
+
         return (
             <ActivityDialog
                 onDismiss={this.onDialogDismiss}
                 onApprove={this.onDialogApprove}
                 activity={activity}
+                processed={processed}
             />
         )
     }
