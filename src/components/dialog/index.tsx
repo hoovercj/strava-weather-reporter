@@ -11,9 +11,10 @@ import { ICancelablePromise, makeCancelable } from 'src/utils/promise-utils';
 export interface IDialogProps {
     onApprove?: () => Promise<void>
     onDismiss: () => Promise<void>;
-    renderContent: () => JSX.Element;
+    renderContent?: () => JSX.Element;
     approveButtonText?: string;
     dismissButtonText: string;
+    title?: string;
 }
 
 export interface IDialogState {
@@ -40,6 +41,7 @@ export abstract class Dialog extends React.Component<IDialogProps, IDialogState>
                 closeButtonAriaLabel={'Cancel and close'}
                 hidden={false}
                 dialogContentProps={{
+                    title: this.props.title,
                     type: DialogType.normal,
                 }}
                 onDismiss={this.props.onDismiss}
@@ -47,7 +49,7 @@ export abstract class Dialog extends React.Component<IDialogProps, IDialogState>
                     isDarkOverlay: true,
                 }}
             >
-                {this.props.renderContent()}
+                {this.props.renderContent && this.props.renderContent()}
                 <DialogFooter>
                     { this.props.onApprove &&
                         <ThemedButton disabled={this.state.busy} primary={true} onClick={this.onApproveButtonClicked} text={this.props.approveButtonText} />

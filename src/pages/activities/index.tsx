@@ -24,6 +24,7 @@ export interface IActivitiesPageProps extends IPageProps {
     onSignOut: () => void;
     userSettings: IUserSettings;
     updateUserSettings: (userSettings: IUserSettings) => Promise<boolean>;
+    deleteAccount: () => void;
 }
 
 export class ActivitiesPage extends Page<IActivitiesPageProps, IActivitiesPageState> {
@@ -77,6 +78,7 @@ export class ActivitiesPage extends Page<IActivitiesPageProps, IActivitiesPageSt
                 userSettings={this.props.userSettings}
                 onSave={this.onSettingsSaved}
                 onDismiss={this.onSettingsDismissed}
+                onDeleteAccount={this.onDeleteAccount}
             />
         );
     }
@@ -100,5 +102,9 @@ export class ActivitiesPage extends Page<IActivitiesPageProps, IActivitiesPageSt
         this.setState({
             settingsOpened: false,
         });
+    }
+
+    private onDeleteAccount = async () => {
+        await this.props.deleteAccount();
     }
 }

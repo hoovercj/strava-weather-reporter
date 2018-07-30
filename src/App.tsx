@@ -1,10 +1,7 @@
 import {
-    Dialog,
-    DialogFooter,
     getTheme,
     ITheme,
     loadTheme,
-    PrimaryButton,
 } from 'office-ui-fabric-react';
 // This is necessary for icons to appear in dialogs
 // TODO: Is it possible to only initialize some icons?
@@ -15,6 +12,7 @@ import * as React from 'react';
 import 'src/styles/colors.css';
 import 'src/styles/fonts.css';
 
+import { Dialog } from 'src/components/dialog';
 import { LoadingOverlay } from 'src/components/loading-overlay';
 import { IAppInfo } from 'src/models/copyright-info';
 import { ActivitiesPage } from 'src/pages/activities';
@@ -42,6 +40,7 @@ interface IAppState {
     userInfo?: IUserInfo;
     userSettings: IUserSettings;
     error?: string;
+    deleteAccount: boolean;
 }
 
 class App extends React.Component<IAppProps, IAppState> {
@@ -56,6 +55,7 @@ class App extends React.Component<IAppProps, IAppState> {
 
         this.state = {
             authenticating: false,
+            deleteAccount: false,
             error: undefined,
             userInfo: this.props.strava.cachedUserInformation(),
             userSettings: this.props.strava.cachedSettings() || App.DEFAULT_USER_SETTINGS,
@@ -72,10 +72,9 @@ class App extends React.Component<IAppProps, IAppState> {
         loadTheme(this.getCustomTheme());
         initializeIcons();
 
-        // If we already have user info, then great!
-        // Clear any query string info though, as we don't need it
         if (this.state.userInfo) {
             clearQueryString();
+            this.getSettings();
             return;
         }
 
@@ -84,24 +83,24 @@ class App extends React.Component<IAppProps, IAppState> {
         if (code) {
             this.authenticate(code);
         }
-
-        if (this.state.userInfo) {
-           this.getSettings();
-        }
     }
 
     public render() {
+        const deleteAccountDialog = this.renderDeleteAccountDialog();
         const errorDialog = this.renderErrorDialog();
         const authPage = this.renderAuthenticatingPage();
         const mainContent = this.state.userInfo ?
             this.renderActivitiesPage() :
             this.renderLandingPage();
 
-            return [
-                errorDialog,
-                authPage,
-                mainContent,
-            ];
+            return (
+                <React.Fragment>
+                    {errorDialog}
+                    {authPage}
+                    {mainContent}
+                    {deleteAccountDialog}
+                </React.Fragment>
+            );
     }
 
     private getSettings = (): Promise<void> => {
@@ -127,23 +126,46 @@ class App extends React.Component<IAppProps, IAppState> {
             .catch(this.handleAuthError);
     }
 
-    private renderErrorDialog = () => {
-        const onDismiss = () => { this.setState({error: undefined}); }
+    private renderDeleteAccountDialog = () => {
+        if (!this.state.deleteAccount) {
+            return null;
+        }
+
+        const onDismiss = () => {
+            this.setState({deleteAccount: false});
+            return Promise.resolve();
+        }
 
         return (
             <Dialog
-                key='error-dialog'
-                hidden={!this.state.error}
-                dialogContentProps={{
-                    onDismiss,
-                    subText: this.state.error,
-                    title: 'Something went wrong',
-                }}
-            >
-                <DialogFooter>
-                    <PrimaryButton onClick={onDismiss} text='Ok' />
-                </DialogFooter>
-            </Dialog>
+                onDismiss={onDismiss}
+                onApprove={this.deleteAccount}
+                approveButtonText='Delete account'
+                dismissButtonText='Cancel'
+                title='Are you sure?'
+            />
+        );
+    }
+
+    private renderErrorDialog = () => {
+        if (!this.state.error) {
+            return null;
+        }
+
+        const onDismiss = () => {
+            this.setState({error: undefined});
+            return Promise.resolve();
+        }
+
+        const renderErrorContent = () => (<p>{this.state.error}</p>);
+
+        return (
+            <Dialog
+                title='Something went wrong'
+                onDismiss={onDismiss}
+                renderContent={renderErrorContent}
+                dismissButtonText='Ok'
+            />
         );
     }
 
@@ -184,6 +206,7 @@ class App extends React.Component<IAppProps, IAppState> {
                 userSettings={this.state.userSettings}
                 updateUserSettings={this.updateUserSettings}
                 strava={this.props.strava}
+                deleteAccount={this.showDeleteAccountDialog}
             />
         )
     }
@@ -191,7 +214,6 @@ class App extends React.Component<IAppProps, IAppState> {
     private signOut = () => {
         this.props.strava.clearCachedInformation();
         this.setState({
-            ...this.state,
             userInfo: undefined,
         });
     }
@@ -240,7 +262,24 @@ class App extends React.Component<IAppProps, IAppState> {
             },
             semanticColors: currentTheme.semanticColors,
         };
-    };
+    }
+
+    private showDeleteAccountDialog = () => {
+        this.setState({ deleteAccount: true });
+    }
+
+    private deleteAccount = async () => {
+        try {
+            await this.props.strava.deleteAccount();
+            this.signOut();
+        } catch {
+            this.setState({
+                error: 'There was a problem deleting your account. Please try again later.'
+            });
+        } finally {
+            this.setState({ deleteAccount: false });
+        }
+    }
 }
 
 export default App;

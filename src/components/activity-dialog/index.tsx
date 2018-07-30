@@ -39,7 +39,7 @@ export class ActivityDialog extends React.Component<IActivityDialogProps> {
                     onApprove={this.onApprove}
                     onDismiss={this.props.onDismiss}
                     renderContent={this.renderEditContent}
-                    approveButtonText='Update settings'
+                    approveButtonText='Update description'
                     dismissButtonText='Cancel'
                 />
             );

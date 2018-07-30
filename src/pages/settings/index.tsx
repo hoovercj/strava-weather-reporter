@@ -1,8 +1,8 @@
 import {
     ChoiceGroup,
     IChoiceGroupOption,
+    Link,
     TooltipHost,
-    // TooltipHost,
 } from 'office-ui-fabric-react';
 import * as React from 'react';
 
@@ -13,6 +13,7 @@ export interface ISettingsPageProps {
     userSettings: IUserSettings;
     onSave: (settings: IUserSettings) => Promise<void>;
     onDismiss: () => Promise<void>;
+    onDeleteAccount: () => void;
 }
 
 interface ISettingsPageState {
@@ -34,6 +35,7 @@ export class SettingsPage extends React.Component<ISettingsPageProps, ISettingsP
     public render() {
         return (
             <Dialog
+                title={'Settings'}
                 renderContent={this.renderContent}
                 approveButtonText={'Save settings'}
                 dismissButtonText={'Cancel'}
@@ -46,7 +48,6 @@ export class SettingsPage extends React.Component<ISettingsPageProps, ISettingsP
     private renderContent = (): JSX.Element => {
         return (
             <React.Fragment>
-                <h1>Settings</h1>
                 <h2>Units</h2>
                 <TooltipHost
                     tooltipProps={{
@@ -67,9 +68,13 @@ export class SettingsPage extends React.Component<ISettingsPageProps, ISettingsP
                                 title: 'min/km, km/h, etc.'
                             },
                         ]}
-
-                        label='Distance Units'
+                        label='Distance'
                         onChange={this.onDistanceUnitsChanged}
+                        styles={{
+                            label: {
+                                fontWeight: 'bold'
+                            }
+                        }}
                     />
                 </TooltipHost>
                 <TooltipHost
@@ -96,10 +101,17 @@ export class SettingsPage extends React.Component<ISettingsPageProps, ISettingsP
                                 title: 'Degrees celcius, wind speed in m/s, etc.'
                             },
                         ]}
-                        label='Weather Units'
+                        label='Weather'
                         onChange={this.onWeatherUnitsChanged}
+                        styles={{
+                            label: {
+                                fontWeight: 'bold'
+                            }
+                        }}
                     />
                 </TooltipHost>
+                <h2>Account</h2>
+                <Link onClick={this.props.onDeleteAccount}>Delete account</Link>
             </React.Fragment>
         )
     }

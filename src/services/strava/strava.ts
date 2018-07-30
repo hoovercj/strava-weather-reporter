@@ -32,7 +32,7 @@ export interface IStrava {
     cachedSettings(): IUserSettings | undefined;
     updateSettings(userSettings: IUserSettings): Promise<void>;
     getSettings(): Promise<IUserSettings>;
-
+    deleteAccount(): Promise<void>;
     clearCachedInformation(): void;
 }
 
@@ -96,6 +96,23 @@ export class Strava implements IStrava {
     constructor(private config: IStravaConfiguration, private storage: IStorage) {
         const apiConfig: Configuration = { accessToken: this.getAuthToken };
         this._activitiesApi = new ActivitiesApi(apiConfig);
+    }
+
+    public deleteAccount = (): Promise<void> => {
+        const userId = this.cachedUserInformation().id;
+        if (!userId) {
+            return Promise.resolve();
+        }
+
+        const apiUrl = `${this.config.backendUrl}/deleteaccount/${userId}`;
+        const params = {
+            code: this.config.backendCode,
+            token: this.getAuthToken(),
+        }
+        const url = getUrlWithParams(apiUrl, params);
+
+        return fetch(url)
+            .then(() => {/* void */});
     }
 
     public getActivitiesApi = (): ActivitiesApi => this.activitiesApi;
@@ -240,8 +257,6 @@ export class Strava implements IStrava {
     public cachedSettings = (): IUserSettings | undefined => {
         return this.getCachedValue<IUserSettings>(this.STRAVA_USER_SETTINGS_STORAGE_KEY);
     }
-
-
 
     private getAuthToken = (): string => {
         const authInfo = this.cachedStravaAuthInfo();
