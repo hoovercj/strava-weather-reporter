@@ -19,8 +19,8 @@ import './index.css';
 
 const storage = new Storage();
 const stravaConfig: IStravaConfiguration = {
-    backendCode: process.env.REACT_APP_BACKEND_URL || '',
-    backendUrl: process.env.REACT_APP_BACKEND_CODE || '',
+    backendCode: process.env.REACT_APP_BACKEND_CODE || '',
+    backendUrl: process.env.REACT_APP_BACKEND_URL || '',
     clientId: Number(process.env.REACT_APP_STRAVA_CLIENT_ID || ''),
     stravaCodeRedirectUri: process.env.REACT_APP_STRAVA_CODE_REDIRECT_URL || '',
 }
