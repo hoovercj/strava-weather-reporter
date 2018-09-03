@@ -30,6 +30,8 @@ const stravaConfig: IStravaConfiguration = {
 // Override config if in test mode
 const testMode = location.search && location.search.toLowerCase().indexOf('test') >= 0;
 if (testMode) {
+    // tslint:disable-next-line
+    debugger
     if (env.REACT_APP_BACKEND_CODE_TEST) {
         stravaConfig.backendCode = env.REACT_APP_BACKEND_CODE_TEST;
     }
