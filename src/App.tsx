@@ -18,11 +18,10 @@ import { IAppInfo } from 'src/models/copyright-info';
 import { ActivitiesPage } from 'src/pages/activities';
 import { LandingPage } from 'src/pages/landing';
 import {
-    DistanceUnits,
+    DEFAULT_USER_SETTINGS,
     IStrava,
     IUserInfo,
     IUserSettings,
-    WeatherUnits,
 } from 'src/services/strava/strava';
 import {
     clearQueryString,
@@ -45,11 +44,6 @@ interface IAppState {
 
 class App extends React.Component<IAppProps, IAppState> {
 
-    private static DEFAULT_USER_SETTINGS: IUserSettings = {
-        distanceUnits: DistanceUnits.Miles,
-        weatherUnits: WeatherUnits.Both,
-    }
-
     constructor(props: IAppProps) {
         super(props);
 
@@ -58,7 +52,7 @@ class App extends React.Component<IAppProps, IAppState> {
             deleteAccount: false,
             error: undefined,
             userInfo: this.props.strava.cachedUserInformation(),
-            userSettings: this.props.strava.cachedSettings() || App.DEFAULT_USER_SETTINGS,
+            userSettings: this.props.strava.cachedSettings() || DEFAULT_USER_SETTINGS,
         };
     }
 
@@ -234,11 +228,12 @@ class App extends React.Component<IAppProps, IAppState> {
         });
     }
 
-    private updateUserSettings = (userSettings: IUserSettings): Promise<boolean> => {
+    private updateUserSettings = (userSettings: Partial<IUserSettings>): Promise<boolean> => {
         return this.props.strava.updateSettings(userSettings)
             .then(() => {
+                const mergedSettings = Object.assign({}, this.state.userSettings, userSettings);
                 this.setState({
-                    userSettings,
+                    userSettings: mergedSettings,
                 });
                 return true;
             })

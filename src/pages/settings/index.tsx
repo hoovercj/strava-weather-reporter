@@ -8,6 +8,7 @@ import * as React from 'react';
 
 import { Dialog } from 'src/components/dialog';
 import { DistanceUnits, IUserSettings, WeatherUnits } from 'src/services/strava/strava';
+import { AutoUpdateActivitiesToggle } from '../auto-update-activities';
 
 export interface ISettingsPageProps {
     userSettings: IUserSettings;
@@ -17,6 +18,7 @@ export interface ISettingsPageProps {
 }
 
 interface ISettingsPageState {
+    autoUpdate: boolean,
     distanceUnits: DistanceUnits,
     weatherUnits: WeatherUnits,
 }
@@ -26,6 +28,7 @@ export class SettingsPage extends React.Component<ISettingsPageProps, ISettingsP
         super(props);
 
         this.state = {
+            autoUpdate: this.props.userSettings.autoUpdate,
             distanceUnits: this.props.userSettings.distanceUnits,
             weatherUnits: this.props.userSettings.weatherUnits,
         }
@@ -48,6 +51,11 @@ export class SettingsPage extends React.Component<ISettingsPageProps, ISettingsP
     private renderContent = (): JSX.Element => {
         return (
             <React.Fragment>
+                <h2>Auto Update Activities</h2>
+                <AutoUpdateActivitiesToggle
+                    checked={this.state.autoUpdate}
+                    onChanged={this.onAutoUpdateChanged}
+                />
                 <h2>Units</h2>
                 <TooltipHost
                     tooltipProps={{
@@ -118,6 +126,7 @@ export class SettingsPage extends React.Component<ISettingsPageProps, ISettingsP
 
     private onSave = (): Promise<void> => {
         return this.props.onSave({
+            autoUpdate: this.state.autoUpdate,
             distanceUnits: this.state.distanceUnits,
             weatherUnits: this.state.weatherUnits,
         });
@@ -133,6 +142,13 @@ export class SettingsPage extends React.Component<ISettingsPageProps, ISettingsP
         this.setState({
             weatherUnits: options.key as WeatherUnits,
         });
+    }
+
+    private onAutoUpdateChanged = (checked: boolean): Promise<void> => {
+        this.setState({
+            autoUpdate: checked,
+        });
+        return Promise.resolve();
     }
 
     private renderDistanceTooltip = (): JSX.Element => {

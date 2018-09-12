@@ -30,7 +30,7 @@ export interface IStrava {
     redirectToStravaAuthorizationPage(): void;
     cachedUserInformation(): IUserInfo | undefined;
     cachedSettings(): IUserSettings | undefined;
-    updateSettings(userSettings: IUserSettings): Promise<void>;
+    updateSettings(userSettings: Partial<IUserSettings>): Promise<void>;
     getSettings(): Promise<IUserSettings>;
     deleteAccount(): Promise<void>;
     clearCachedInformation(): void;
@@ -54,6 +54,7 @@ export interface IUserInfo {
 export interface IUserSettings {
     distanceUnits: DistanceUnits;
     weatherUnits: WeatherUnits;
+    autoUpdate: boolean;
 }
 
 export enum DistanceUnits {
@@ -67,12 +68,13 @@ export enum WeatherUnits {
     Both = 'Both',
 }
 
-export class Strava implements IStrava {
+export const DEFAULT_USER_SETTINGS: IUserSettings = {
+    autoUpdate: false,
+    distanceUnits: DistanceUnits.Miles,
+    weatherUnits: WeatherUnits.Both,
+};
 
-    public static defaultUserSettings: IUserSettings = {
-        distanceUnits: DistanceUnits.Miles,
-        weatherUnits: WeatherUnits.Both,
-    }
+export class Strava implements IStrava {
 
     public static getStravaUrl = () => {
         return 'https://www.strava.com';

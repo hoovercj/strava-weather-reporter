@@ -7,6 +7,7 @@ import * as React from 'react';
 
 import { ActivitiesList } from 'src/components/activities-list';
 import { PageHeader } from 'src/components/page-header';
+import { AutoUpdateActivitiesToggle } from 'src/pages/auto-update-activities';
 import { IPageProps, Page } from 'src/pages/page';
 import {
     SettingsPage
@@ -23,7 +24,7 @@ export interface IActivitiesPageProps extends IPageProps {
     activitiesPerPage: number;
     onSignOut: () => void;
     userSettings: IUserSettings;
-    updateUserSettings: (userSettings: IUserSettings) => Promise<boolean>;
+    updateUserSettings: (userSettings: Partial<IUserSettings>) => Promise<boolean>;
     deleteAccount: () => void;
 }
 
@@ -39,6 +40,10 @@ export class ActivitiesPage extends Page<IActivitiesPageProps, IActivitiesPageSt
     protected renderHeader() {
         return (
             <PageHeader pageTitle={this.props.applicationInfo.applicationName}>
+                <AutoUpdateActivitiesToggle
+                    checked={this.props.userSettings.autoUpdate}
+                    onChanged={this.onAutoUpdateChanged}
+                />
                 <IconButton
                     ariaLabel={'Settings'}
                     iconProps={{
@@ -106,5 +111,9 @@ export class ActivitiesPage extends Page<IActivitiesPageProps, IActivitiesPageSt
 
     private onDeleteAccount = async () => {
         await this.props.deleteAccount();
+    }
+
+    private onAutoUpdateChanged = async (autoUpdate: boolean) => {
+        return this.props.updateUserSettings({ autoUpdate });
     }
 }
