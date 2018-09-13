@@ -137,7 +137,18 @@ class App extends React.Component<IAppProps, IAppState> {
                 approveButtonText='Delete account'
                 dismissButtonText='Cancel'
                 title='Are you sure?'
+                renderContent={this.renderDeleteAccountDialogContent}
             />
+        );
+    }
+
+    private renderDeleteAccountDialogContent = (): JSX.Element => {
+        return (
+            <React.Fragment>
+                <p>Deleting your account will prevent this application from accessing your Strava data and will delete any stored information.</p>
+                <br/>
+                <p>This action will <b>not</b> touch your Strava activities or modify any descriptions that have already been added.</p>
+            </React.Fragment>
         );
     }
 
