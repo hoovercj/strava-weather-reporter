@@ -61,6 +61,7 @@ export class ActivityDialog extends React.Component<IActivityDialogProps> {
                     value={this.props.activity.description}
                     multiline={true}
                     aria-labelledby={titleId}
+                    rows={5}
                 />
             </React.Fragment>
         );
