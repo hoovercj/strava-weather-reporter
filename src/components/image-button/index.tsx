@@ -21,6 +21,9 @@ export class ImageButton extends React.Component<IImageButtonProps> {
                 className={`image-button_link ${this.props.className || ''}`}
                 aria-label={this.props['aria-label']}
                 onClick={this.props.onClick}
+                target={this.props.target}
+                href={this.props.href}
+                rel={this.props.rel}
             >
                 <img
                     className={this.props.imageId}
