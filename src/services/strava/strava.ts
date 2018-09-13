@@ -113,7 +113,7 @@ export class Strava implements IStrava {
         }
         const url = getUrlWithParams(apiUrl, params);
 
-        return fetch(url)
+        return fetch(url, { method: 'DELETE' })
             .then(() => {/* void */});
     }
 
