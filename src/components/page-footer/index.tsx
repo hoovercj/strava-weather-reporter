@@ -25,7 +25,7 @@ export class PageFooter extends React.Component<IPageFooterProps, IPageFooterSta
             showPrivacyPolicy: false,
         };
     }
-    
+
     public render() {
 
         const {
@@ -43,7 +43,17 @@ export class PageFooter extends React.Component<IPageFooterProps, IPageFooterSta
                 <div className={'page-footer_column page-footer_column_center'}>
                     <Link className={'page-footer_link'} href={`mailto:${contactEmail}?subject=About ${applicationName}`}>Contact</Link>
                     <span className={'page-footer_separator'}>|</span>
-                    <Link className={'page-footer_link'} onClick={this.onPrivacyPolicyLinkInvoked}>Privacy Policy</Link>
+                    <Link
+                        className={'page-footer_link'}
+                        onClick={this.onPrivacyPolicyLinkInvoked}
+                        styles={{
+                            root: {
+                                borderBottom: 'initial',
+                            }
+                        }}
+                    >
+                        Privacy Policy
+                    </Link>
                     <span className={'page-footer_separator'}>|</span>
                     <Link className={'page-footer_link'} href={githubUrl}>Github</Link>
                 </div>
@@ -73,7 +83,7 @@ export class PageFooter extends React.Component<IPageFooterProps, IPageFooterSta
     private onPrivacyPolicyLinkInvoked = () => {
         this.setState({showPrivacyPolicy: true});
     }
-    
+
     private onPrivacyPolicyDialogDismissed = () => {
         this.setState({showPrivacyPolicy: false});
     }
