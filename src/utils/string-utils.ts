@@ -1,9 +1,9 @@
-import { format } from 'date-fns';
+import { format as formatDate } from 'date-fns';
 
 import { DistanceUnits } from 'src/services/strava/strava';
 
 export const dateToDateTimeString = (date: Date): string => {
-    return format(date, 'MMMM Do[,] YYYY [at] h[:]mm a')
+    return formatDate(date, 'MMMM Do[,] YYYY [at] h[:]mm a')
 }
 
 export const metersPerSecondToDisplayString = (metersPerSecond: number, distanceUnits: DistanceUnits): string => {
@@ -69,17 +69,27 @@ const distanceInMetersToMileString = (meters: number): string => {
 }
 
 const metersPerSecondToMinutesPerKilometerString = (metersPerSecond: number): string => {
-    const minutesPerKilometerDecimal = metersPerSecond * 1.66666667;
-    const minutes = Math.floor(minutesPerKilometerDecimal);
-    const seconds = leftPad(Math.round((minutesPerKilometerDecimal % 1) * 60), 2);
+    const minutesPerKilometerDecimal = 16.6666667 / metersPerSecond;
+    let minutes = Math.floor(minutesPerKilometerDecimal);
+    let seconds = Math.round((minutesPerKilometerDecimal % 1) * 60);
+    if (seconds === 60) {
+        minutes += 1;
+        seconds = 0;
+    }
+    const secondsString = leftPad(seconds, 2);
 
-    return `${minutes}:${seconds} / km`;
+    return `${minutes}:${secondsString} / km`;
 }
 
 const metersPerSecondToMinutesPerMileString = (metersPerSecond: number): string => {
-    const minutesPerMileDecimal = metersPerSecond * 2.68224;
-    const minutes = Math.floor(minutesPerMileDecimal);
-    const seconds = leftPad(Math.round((minutesPerMileDecimal % 1) * 60), 2);
+    const minutesPerMileDecimal = 26.8224 / metersPerSecond;
+    let minutes = Math.floor(minutesPerMileDecimal);
+    let seconds = Math.round((minutesPerMileDecimal % 1) * 60);
+    if (seconds === 60) {
+        minutes += 1;
+        seconds = 0;
+    }
+    const secondsString = leftPad(seconds, 2);
 
-    return `${minutes}:${seconds} / mi`;
+    return `${minutes}:${secondsString} / mi`;
 }
