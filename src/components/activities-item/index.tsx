@@ -27,7 +27,13 @@ export class ActivitiesItem extends React.Component<IActivitiesItemProps> {
     public render() {
         const activity = this.props.activity;
 
-        const date = activity.start_date_local && dateToDateTimeString(new Date(activity.start_date_local));
+        // start_date_local has the local time but doesn't include the time zone (i.e. 17:00)
+        // start_date has the UTC time
+        // using `new Date(activity.start_date)` will let the browser convert the utc date
+        // to a time local to the users browser. If they did an activity in a different time zone
+        // than they are currently viewing the site in, the time will be wrong, but that is
+        // behavior that I consider acceptable for now.
+        const date = activity.start_date && dateToDateTimeString(new Date(activity.start_date));
         const name = this.props.activity.name;
 
         const stats: IActivityStatistic[] = [{
