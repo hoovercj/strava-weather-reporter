@@ -46,16 +46,16 @@ export class ActivityDialog extends React.Component<IActivityDialogProps> {
         }
     }
 
-    private renderViewContent = (): JSX.Element => {
+    private renderContent = (edit: boolean): JSX.Element => {
         const titleId = 'edit-activity-description-dialog-title';
-
+        const message = edit ?
+            'Update description to the content below for activity' :
+            'The description was previously set to the content below for activity';
         return (
             <React.Fragment>
                 {/* TODO: ensure that this is read by a screenreader when opening the dialog */}
                 <h1 className={'activity-dialog_title'} id={titleId}>View Activity Description</h1>
-                <p>
-                    The description was previously set to the content below for activity {this.renderActivityLink()}
-                </p>
+                <p>{message} {this.renderActivityLink()}</p>
                 <TextField
                     readOnly={true}
                     value={this.props.activity.description}
@@ -67,25 +67,12 @@ export class ActivityDialog extends React.Component<IActivityDialogProps> {
         );
     }
 
+    private renderViewContent = (): JSX.Element => {
+        return this.renderContent(false);
+    }
+
     private renderEditContent = (): JSX.Element => {
-        const titleId = 'edit-activity-description-dialog-title';
-
-        return (
-            <React.Fragment>
-                {/* TODO: ensure that this is read by a screenreader when opening the dialog */}
-                <h1 className={'activity-dialog_title'} id={titleId}>Edit Activity Description</h1>
-                <p>
-                    Update description to the content below for activity {this.renderActivityLink()}
-                </p>
-                <TextField
-                    readOnly={true}
-                    value={this.props.activity.description}
-                    multiline={true}
-                    aria-labelledby={titleId}
-                />
-            </React.Fragment>
-
-        )
+        return this.renderContent(true);
     }
 
     private renderActivityLink = () => {
