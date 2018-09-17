@@ -7,6 +7,7 @@ import * as React from 'react';
 export interface IAutoUpdateActivitiesToggleProps {
     checked: boolean;
     onChanged: (value: boolean) => Promise<any>;
+    renderTooltip?: boolean;
 }
 
 export interface IAutoUpdateActivitiesToggleState {
@@ -24,19 +25,25 @@ export class AutoUpdateActivitiesToggle extends React.Component<IAutoUpdateActiv
     }
 
     public render(): JSX.Element  {
-        return (
+        return this.props.renderTooltip ? (
             <TooltipHost
                 tooltipProps={{
                     onRenderContent: this.renderAutoUpdateTooltip,
                 }}
             >
-                <Toggle
-                    checked={this.props.checked}
-                    onChanged={this.onChanged}
-                    onText='Auto Update Enabled'
-                    offText='Auto Update Disabled'
-                />
+                {this.renderToggle()}
             </TooltipHost>
+        ) : this.renderToggle();
+    }
+
+    private renderToggle = (): JSX.Element => {
+        return (
+            <Toggle
+                checked={this.props.checked}
+                onChanged={this.onChanged}
+                onText='Auto Update Enabled'
+                offText='Auto Update Disabled'
+            />
         );
     }
 

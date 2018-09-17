@@ -53,6 +53,7 @@ export class SettingsPage extends React.Component<ISettingsPageProps, ISettingsP
             <React.Fragment>
                 <h2>Auto Update Activities</h2>
                 <AutoUpdateActivitiesToggle
+                    renderTooltip={true}
                     checked={this.state.autoUpdate}
                     onChanged={this.onAutoUpdateChanged}
                 />
