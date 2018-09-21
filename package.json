@@ -1,6 +1,6 @@
 {
     "name": "strava-weather",
-    "homepage": "https://www.stravaweather.net/",
+    "homepage": "https://www.stravaweather.net",
     "version": "0.1.0",
     "private": true,
     "description": "Website which makes it quick and easy to add weather information to Strava activity descriptions",
