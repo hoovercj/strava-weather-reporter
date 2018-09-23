@@ -1,13 +1,21 @@
 import {
     ChoiceGroup,
+    ComboBox,
     IChoiceGroupOption,
+    IComboBoxOption,
     Link,
     TooltipHost,
 } from 'office-ui-fabric-react';
 import * as React from 'react';
 
 import { Dialog } from 'src/components/dialog';
-import { DistanceUnits, IUserSettings, WeatherUnits } from 'src/services/strava/strava';
+import {
+    DistanceUnits,
+    IUserSettings,
+    WeatherFieldSettings,
+    WeatherInformation,
+    WeatherUnits,
+} from 'src/services/strava/strava';
 import { AutoUpdateActivitiesToggle } from '../auto-update-activities';
 
 export interface ISettingsPageProps {
@@ -21,6 +29,7 @@ interface ISettingsPageState {
     autoUpdate: boolean,
     distanceUnits: DistanceUnits,
     weatherUnits: WeatherUnits,
+    weatherFields: WeatherFieldSettings,
 }
 
 export class SettingsPage extends React.Component<ISettingsPageProps, ISettingsPageState> {
@@ -30,9 +39,9 @@ export class SettingsPage extends React.Component<ISettingsPageProps, ISettingsP
         this.state = {
             autoUpdate: this.props.userSettings.autoUpdate,
             distanceUnits: this.props.userSettings.distanceUnits,
+            weatherFields: this.props.userSettings.weatherFields,
             weatherUnits: this.props.userSettings.weatherUnits,
         }
-
     }
 
     public render() {
@@ -56,6 +65,15 @@ export class SettingsPage extends React.Component<ISettingsPageProps, ISettingsP
                     renderTooltip={true}
                     checked={this.state.autoUpdate}
                     onChanged={this.onAutoUpdateChanged}
+                />
+                <h2>Information</h2>
+                <ComboBox
+                    label={'Choose which information to add to descriptions.\nItems with a * will only be shown when the weather dictates.'}
+                    multiSelect={true}
+                    defaultSelectedKey={this.defaultWeatherFieldSelectedKeys}
+                    options={this.weatherFieldOptions}
+                    selectedKey={this.currentWeatherFieldSelectedKeys}
+                    onChanged={this.onChangeWeatherFields}
                 />
                 <h2>Units</h2>
                 <TooltipHost
@@ -125,10 +143,21 @@ export class SettingsPage extends React.Component<ISettingsPageProps, ISettingsP
         )
     }
 
+    private onChangeWeatherFields = (option: IComboBoxOption): void => {
+        // User selected/de-selected an existing option
+        this.setState({
+            weatherFields: {
+                ...this.state.weatherFields,
+                [option.key]: option.selected,
+            },
+        });
+    };
+
     private onSave = (): Promise<void> => {
         return this.props.onSave({
             autoUpdate: this.state.autoUpdate,
             distanceUnits: this.state.distanceUnits,
+            weatherFields: this.state.weatherFields,
             weatherUnits: this.state.weatherUnits,
         });
     }
@@ -173,5 +202,25 @@ export class SettingsPage extends React.Component<ISettingsPageProps, ISettingsP
                 <p><b>Metric: </b>Degrees celcius, wind speed in m/s, etc.</p>
             </React.Fragment>
         )
+    }
+
+    private get weatherFieldOptions(): IComboBoxOption[] {
+        return Object.keys(WeatherInformation).map(value => {
+            const comboBoxOption = {
+                key: value,
+                // selected: this.state.weatherFields[value],
+                text: WeatherInformation[value],
+            } as IComboBoxOption;
+
+            return comboBoxOption;
+        })
+    }
+
+    private get defaultWeatherFieldSelectedKeys(): string[] {
+        return Object.keys(WeatherInformation).filter(value => this.props.userSettings.weatherFields[value]);
+    }
+
+    private get currentWeatherFieldSelectedKeys(): string[] {
+        return Object.keys(WeatherInformation).filter(value => this.state.weatherFields[value]);
     }
 }

@@ -51,10 +51,34 @@ export interface IUserInfo {
     email: string;
 }
 
+export enum WeatherInformation {
+    summary = 'Summary',
+    temperature = 'Temperature',
+    apparentTemperature = '"Feels like" Temperature',
+    uvIndex = 'UV Index*',
+    precipType = 'Precipitation Type*',
+    precipIntensity = 'Precipitation Intensity*',
+    precipProbability = 'Precipitation Probability*',
+    humidity = 'Humidity',
+    dewPoint = 'Dew Point',
+    windSpeed = 'Wind Speed',
+    windGust = 'Wind Gust*',
+    windBearing = 'Wind Bearing',
+    pressure = 'Pressure',
+    cloudCover = 'Cloud Cover',
+    visibility = 'Visibility',
+    ozone = 'Ozone',
+}
+
+type WeatherFieldKeys = keyof typeof WeatherInformation;
+
+export type WeatherFieldSettings = {[key in WeatherFieldKeys]?: boolean};
+
 export interface IUserSettings {
     distanceUnits: DistanceUnits;
     weatherUnits: WeatherUnits;
     autoUpdate: boolean;
+    weatherFields: WeatherFieldSettings;
 }
 
 export enum DistanceUnits {
@@ -71,9 +95,23 @@ export enum WeatherUnits {
 export const DEFAULT_USER_SETTINGS: IUserSettings = {
     autoUpdate: false,
     distanceUnits: DistanceUnits.Miles,
+    weatherFields: {
+        apparentTemperature: true,
+        humidity: true,
+        precipIntensity: true,
+        precipProbability: true,
+        precipType: true,
+        summary: true,
+        temperature: true,
+        uvIndex: true,
+        windBearing: true,
+        windGust: true,
+        windSpeed: true,
+    },
     weatherUnits: WeatherUnits.Both,
 };
 
+// tslint:disable-next-line:max-classes-per-file
 export class Strava implements IStrava {
 
     public static getStravaUrl = () => {

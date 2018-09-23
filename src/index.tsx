@@ -18,7 +18,6 @@ import {
 import './index.css';
 
 const env = process.env;
-
 const storage = new Storage();
 const stravaConfig: IStravaConfiguration = {
     backendCode: env.REACT_APP_BACKEND_CODE || '',
@@ -31,7 +30,6 @@ const stravaConfig: IStravaConfiguration = {
 const testMode = location.search && location.search.toLowerCase().indexOf('test') >= 0;
 if (testMode) {
     // tslint:disable-next-line
-    debugger
     if (env.REACT_APP_BACKEND_CODE_TEST) {
         stravaConfig.backendCode = env.REACT_APP_BACKEND_CODE_TEST;
     }
