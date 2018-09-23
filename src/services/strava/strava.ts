@@ -29,7 +29,7 @@ export interface IStrava {
     exchangeCodeForUserInformation(code: string): Promise<IUserInfo>;
     redirectToStravaAuthorizationPage(): void;
     cachedUserInformation(): IUserInfo | undefined;
-    cachedSettings(): IUserSettings | undefined;
+    cachedSettings(): IUserSettings;
     updateSettings(userSettings: Partial<IUserSettings>): Promise<void>;
     getSettings(): Promise<IUserSettings>;
     deleteAccount(): Promise<void>;
@@ -294,7 +294,7 @@ export class Strava implements IStrava {
             });
     }
 
-    public cachedSettings = (): IUserSettings | undefined => {
+    public cachedSettings = (): IUserSettings => {
         return Object.assign(DEFAULT_USER_SETTINGS, this.getCachedValue<IUserSettings>(this.STRAVA_USER_SETTINGS_STORAGE_KEY));
     }
 

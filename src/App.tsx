@@ -18,7 +18,6 @@ import { IAppInfo } from 'src/models/copyright-info';
 import { ActivitiesPage } from 'src/pages/activities';
 import { LandingPage } from 'src/pages/landing';
 import {
-    DEFAULT_USER_SETTINGS,
     IStrava,
     IUserInfo,
     IUserSettings,
