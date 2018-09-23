@@ -52,7 +52,7 @@ class App extends React.Component<IAppProps, IAppState> {
             deleteAccount: false,
             error: undefined,
             userInfo: this.props.strava.cachedUserInformation(),
-            userSettings: this.props.strava.cachedSettings() || DEFAULT_USER_SETTINGS,
+            userSettings: this.props.strava.cachedSettings(),
         };
     }
 

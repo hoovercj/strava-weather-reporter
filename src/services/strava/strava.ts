@@ -290,12 +290,12 @@ export class Strava implements IStrava {
             .then(response => response.json())
             .then((userSettings: IUserSettings) => {
                 this.setCachedValue<IUserSettings>(this.STRAVA_USER_SETTINGS_STORAGE_KEY, userSettings);
-                return userSettings;
+                return Object.assign(DEFAULT_USER_SETTINGS, userSettings);
             });
     }
 
     public cachedSettings = (): IUserSettings | undefined => {
-        return this.getCachedValue<IUserSettings>(this.STRAVA_USER_SETTINGS_STORAGE_KEY);
+        return Object.assign(DEFAULT_USER_SETTINGS, this.getCachedValue<IUserSettings>(this.STRAVA_USER_SETTINGS_STORAGE_KEY));
     }
 
     private getAuthToken = (): string => {
