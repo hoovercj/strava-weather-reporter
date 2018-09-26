@@ -1,3 +1,6 @@
+// tslint:disable-next-line
+const deepmerge = require('deepmerge');
+
 import {
     ActivitiesApi,
     Configuration,
@@ -68,11 +71,14 @@ export enum WeatherInformation {
     cloudCover = 'Cloud Cover',
     visibility = 'Visibility',
     ozone = 'Ozone',
+    link = 'Link to www.stravaweather.net'
 }
 
 type WeatherFieldKeys = keyof typeof WeatherInformation;
 
-export type WeatherFieldSettings = {[key in WeatherFieldKeys]?: boolean};
+export type WeatherFieldSettings = {
+    [key in WeatherFieldKeys]?: boolean
+};
 
 export interface IUserSettings {
     distanceUnits: DistanceUnits;
@@ -98,6 +104,7 @@ export const DEFAULT_USER_SETTINGS: IUserSettings = {
     weatherFields: {
         apparentTemperature: true,
         humidity: true,
+        link: true,
         precipIntensity: true,
         precipProbability: true,
         precipType: true,
@@ -290,12 +297,12 @@ export class Strava implements IStrava {
             .then(response => response.json())
             .then((userSettings: IUserSettings) => {
                 this.setCachedValue<IUserSettings>(this.STRAVA_USER_SETTINGS_STORAGE_KEY, userSettings);
-                return Object.assign(DEFAULT_USER_SETTINGS, userSettings);
+                return deepmerge.default(DEFAULT_USER_SETTINGS, userSettings);
             });
     }
 
     public cachedSettings = (): IUserSettings => {
-        return Object.assign(DEFAULT_USER_SETTINGS, this.getCachedValue<IUserSettings>(this.STRAVA_USER_SETTINGS_STORAGE_KEY));
+        return deepmerge.default(DEFAULT_USER_SETTINGS, this.getCachedValue<IUserSettings>(this.STRAVA_USER_SETTINGS_STORAGE_KEY));
     }
 
     private getAuthToken = (): string => {
