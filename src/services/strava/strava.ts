@@ -85,6 +85,7 @@ export interface IUserSettings {
     weatherUnits: WeatherUnits;
     autoUpdate: boolean;
     weatherFields: WeatherFieldSettings;
+    ignoreVirtualActivities: boolean;
 }
 
 export enum DistanceUnits {
@@ -101,6 +102,7 @@ export enum WeatherUnits {
 export const DEFAULT_USER_SETTINGS: IUserSettings = {
     autoUpdate: false,
     distanceUnits: DistanceUnits.Miles,
+    ignoreVirtualActivities: false,
     weatherFields: {
         apparentTemperature: true,
         humidity: true,

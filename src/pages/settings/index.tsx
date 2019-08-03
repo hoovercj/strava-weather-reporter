@@ -12,10 +12,10 @@ import { Dialog } from 'src/components/dialog';
 import {
     DistanceUnits,
     IUserSettings,
-    WeatherFieldSettings,
     WeatherInformation,
     WeatherUnits,
 } from 'src/services/strava/strava';
+import { ToggleControl } from '../../components/toggle-control';
 import { AutoUpdateActivitiesToggle } from '../auto-update-activities';
 
 export interface ISettingsPageProps {
@@ -25,11 +25,9 @@ export interface ISettingsPageProps {
     onDeleteAccount: () => void;
 }
 
-interface ISettingsPageState {
-    autoUpdate: boolean,
-    distanceUnits: DistanceUnits,
-    weatherUnits: WeatherUnits,
-    weatherFields: WeatherFieldSettings,
+// tslint:disable-next-line:no-empty-interface
+interface ISettingsPageState extends IUserSettings {
+    // Intentionally empty
 }
 
 export class SettingsPage extends React.Component<ISettingsPageProps, ISettingsPageState> {
@@ -39,6 +37,7 @@ export class SettingsPage extends React.Component<ISettingsPageProps, ISettingsP
         this.state = {
             autoUpdate: this.props.userSettings.autoUpdate,
             distanceUnits: this.props.userSettings.distanceUnits,
+            ignoreVirtualActivities: this.props.userSettings.ignoreVirtualActivities,
             weatherFields: this.props.userSettings.weatherFields,
             weatherUnits: this.props.userSettings.weatherUnits,
         }
@@ -62,9 +61,19 @@ export class SettingsPage extends React.Component<ISettingsPageProps, ISettingsP
             <React.Fragment>
                 <h2>Auto Update Activities</h2>
                 <AutoUpdateActivitiesToggle
-                    renderTooltip={true}
                     checked={this.state.autoUpdate}
                     onChanged={this.onAutoUpdateChanged}
+                />
+                <ToggleControl
+                    renderTooltip={true}
+                    checked={this.state.ignoreVirtualActivities}
+                    onChanged={this.onIgnoreVirtualChanged}
+                    offText='Updating Virtual Activities'
+                    onText='Ignoring Virtual Activities'
+                    tooltipProps={{
+                        bodyText: 'When turned on, virtual runs and bike rides will be ignored.',
+                        headingText: 'Ignore Virtual Activities',
+                    }}
                 />
                 <h2>Information</h2>
                 <ComboBox
@@ -157,6 +166,7 @@ export class SettingsPage extends React.Component<ISettingsPageProps, ISettingsP
         return this.props.onSave({
             autoUpdate: this.state.autoUpdate,
             distanceUnits: this.state.distanceUnits,
+            ignoreVirtualActivities: this.state.ignoreVirtualActivities,
             weatherFields: this.state.weatherFields,
             weatherUnits: this.state.weatherUnits,
         });
@@ -177,6 +187,13 @@ export class SettingsPage extends React.Component<ISettingsPageProps, ISettingsP
     private onAutoUpdateChanged = (checked: boolean): Promise<void> => {
         this.setState({
             autoUpdate: checked,
+        });
+        return Promise.resolve();
+    }
+
+    private onIgnoreVirtualChanged = (checked: boolean): Promise<void> => {
+        this.setState({
+            ignoreVirtualActivities: checked,
         });
         return Promise.resolve();
     }
